@@ -19,12 +19,16 @@ namespace Sawmill
         public override string ReadLine()
         {
             var line = base.ReadLine();
-            return ProcessReminder(line);
+            return line;
+
+            // TODO
+            //return ProcessReminder(line);
         }
 
         public override Task<string> ReadLineAsync()
         {
-            return base.ReadLineAsync().ContinueWith(s => this.ProcessReminder(s.Result));
+            // TODO
+            return base.ReadLineAsync();//.ContinueWith(s => this.ProcessReminder(s.Result));
         }
 
         private string ProcessReminder(string line)
