@@ -6,13 +6,13 @@ namespace Sawmill.Models
 {
     public class LogEntry
     {
-        private const string DateTimeFormat = "dd/MMM/yyyy:HH:mm:ss zzz";
+        private const string TimeStampFormat = "dd/MMM/yyyy:HH:mm:ss zzz";
         private const char MissingValue = '-';
 
         public IPAddress ClientAddress { get; private set; }
         public string UserId { get; private set; }
         public string UserName { get; private set; }
-        public DateTime DateTime { get; private set; }
+        public DateTime TimeStampUtc { get; private set; }
         public LogEntryRequest Request { get; private set; }
         public int Status { get; private set; }
         public int? ObjectSize { get; private set; }
@@ -22,7 +22,7 @@ namespace Sawmill.Models
             span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> clientAddressPart);
             span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> userIdPart);
             span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> userNamePart);
-            span = span.Slice('[', ']', out ReadOnlySpan<char> dateTimePart);
+            span = span.Slice('[', ']', out ReadOnlySpan<char> timeStampPart);
             span = span.Slice('\"', '\"', out ReadOnlySpan<char> requestPart);
             span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> statusPart);
             span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> objectSizePart);
@@ -31,7 +31,7 @@ namespace Sawmill.Models
             var userName = ParseName(userIdPart);
 
             if (!IPAddress.TryParse(clientAddressPart, out IPAddress clientAddress) ||
-                !TryParseDateTime(dateTimePart, out DateTime dateTime) ||
+                !TryParseTimeStamp(timeStampPart, out DateTime timeStampUtc) ||
                 !TryParseInt(statusPart, out int status) ||
                 !TryParseNullableInt(objectSizePart, out int? objectSize) ||
                 !LogEntryRequest.TryParse(requestPart, out LogEntryRequest request))
@@ -45,7 +45,7 @@ namespace Sawmill.Models
                 ClientAddress = clientAddress,
                 UserId = userId,
                 UserName = userName,
-                DateTime = dateTime,
+                TimeStampUtc = timeStampUtc,
                 Request = request,
                 Status = status,
                 ObjectSize = objectSize
@@ -59,9 +59,9 @@ namespace Sawmill.Models
             return IsMissingValue(span) ? string.Empty : span.ToString();
         }
 
-        private static bool TryParseDateTime(ReadOnlySpan<char> span, out DateTime result)
+        private static bool TryParseTimeStamp(ReadOnlySpan<char> span, out DateTime timeStampUtc)
         {
-            return DateTime.TryParseExact(span, DateTimeFormat, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out result);
+            return DateTime.TryParseExact(span, TimeStampFormat, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out timeStampUtc);
         }
 
         private static bool TryParseInt(ReadOnlySpan<char> span, out int result)

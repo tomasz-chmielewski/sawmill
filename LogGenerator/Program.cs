@@ -11,6 +11,23 @@ namespace LogGenerator
         private const string LogPath = @"C:\Users\tom_c\Downloads\access-log-sample.log";
         private const int DelayMilliseconds = 100;
 
+        private static readonly Random Random = new Random();
+
+        private static readonly string[] ValidEndpoints = new[]
+        {
+            "/",
+            "/api",
+            "/api/",
+            "/api/items",
+            "/api/posts",
+            "/api/user/12/posts",
+            "/api/user/12/posts?q=abc",
+            "/data",
+            "/users/test",
+            "/endpoint1/test",
+            "/endpoint2/test",
+        };
+
         public static void Main(string[] args)
         {
             using (var cts = new CancellationTokenSource())
@@ -52,12 +69,14 @@ namespace LogGenerator
 
         private static string GenerateLogEntry()
         {
+            var endpoint = ValidEndpoints[Random.Next(ValidEndpoints.Length)];
+
             var clientAddress = "127.0.0.1";
             var userId = "-";
             var userName = "frank";
             var dateTime = DateTime.Now.ToString("dd/MMM/yyyy:HH:mm:ss zzz", CultureInfo.InvariantCulture);
-            var request = "GET /api/endpoint HTTP/1.0";
-            var status = 200;
+            var request = $"GET {endpoint} HTTP/1.0";
+            var status = Random.Next(200, 599);
             var objectSize = 48;
 
             var colonIndex = dateTime.LastIndexOf(':');

@@ -18,8 +18,10 @@ namespace Sawmill
 
                 try
                 {
-                    var application = new SawmillApplication();
-                    application.Run(cancellationTokenSource.Token);
+                    using (var application = new SawmillApplication())
+                    {
+                        application.Run(cancellationTokenSource.Token);
+                    }
                 }
                 catch (OperationCanceledException) { }
                 catch (Exception e)
