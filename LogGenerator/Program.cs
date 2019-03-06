@@ -63,8 +63,7 @@ namespace LogGenerator
             var colonIndex = dateTime.LastIndexOf(':');
             dateTime = dateTime.Substring(0, colonIndex) + dateTime.Substring(colonIndex + 1);
 
-            FormattableString formattable = $"{clientAddress} {userId} {userName} [{dateTime}] \"{request}\" {status} {objectSize}";
-            return formattable.ToString(CultureInfo.InvariantCulture);
+            return FormattableString.Invariant($"{clientAddress} {userId} {userName} [{dateTime}] \"{request}\" {status} {objectSize}");
         }
     }
 }
