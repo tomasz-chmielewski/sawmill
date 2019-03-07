@@ -1,4 +1,5 @@
-﻿using Sawmill.Models;
+﻿using Sawmill.Common.IO;
+using Sawmill.Models;
 using Sawmill.Providers.Abstractions;
 using System;
 using System.IO;

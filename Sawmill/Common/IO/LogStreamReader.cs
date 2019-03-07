@@ -2,7 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sawmill
+namespace Sawmill.Common.IO
 {
     public class LogStreamReader : StreamReader
     {

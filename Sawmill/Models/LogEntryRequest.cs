@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sawmill.Common.Extensions;
+using System;
 
 namespace Sawmill.Models
 {

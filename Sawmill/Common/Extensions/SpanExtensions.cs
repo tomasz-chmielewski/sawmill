@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sawmill
+namespace Sawmill.Common.Extensions
 {
     public static class SpanExtensions
     {

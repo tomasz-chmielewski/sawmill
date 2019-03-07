@@ -1,4 +1,5 @@
-﻿using Sawmill.Models;
+﻿using Sawmill.Common.Extensions;
+using Sawmill.Models;
 using Sawmill.Providers;
 using Sawmill.Statistics;
 using System;
@@ -18,9 +19,9 @@ namespace Sawmill.Application
             this.LogEntryProvider = new LogEntryProvider();
         }
 
-        private TimeSpan FetchInterval { get; } = TimeSpan.FromMilliseconds(500);
-        private TimeSpan ReportDelay { get; } = TimeSpan.FromMilliseconds(1000);
-        private TimeSpan ReportInterval { get; } = TimeSpan.FromSeconds(10);
+        private TimeSpan FetchInterval { get; } = TimeSpan.FromMilliseconds(100);
+        private TimeSpan ReportDelay { get; } = TimeSpan.FromMilliseconds(100);
+        private TimeSpan ReportInterval { get; } = TimeSpan.FromSeconds(1);
 
         private DateTime NextReportTimeUtc { get; set; }
         private DateTime MinAcceptableTimeStampUtc { get; set; }
