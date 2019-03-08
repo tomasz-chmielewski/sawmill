@@ -1,4 +1,5 @@
-﻿using Sawmill.Common.Extensions;
+﻿using Sawmill.Alerts;
+using Sawmill.Common.Extensions;
 using Sawmill.Models;
 using Sawmill.Providers;
 using Sawmill.Statistics;
@@ -17,11 +18,14 @@ namespace Sawmill.Application
         {
             this.GlobalStatistics = new StatisticsProcessor();
             this.LogEntryProvider = new LogEntryProvider();
+
+            this.AlertManager = new AlertManager();
+            this.AlertManager.Alert += this.AlertManager_Alert;
         }
 
-        private TimeSpan FetchInterval { get; } = TimeSpan.FromMilliseconds(100);
-        private TimeSpan ReportDelay { get; } = TimeSpan.FromMilliseconds(100);
-        private TimeSpan ReportInterval { get; } = TimeSpan.FromSeconds(1);
+        private TimeSpan FetchInterval { get; } = TimeSpan.FromMilliseconds(500);
+        private TimeSpan ReportDelay { get; } = TimeSpan.FromMilliseconds(1000);
+        private TimeSpan ReportInterval { get; } = TimeSpan.FromSeconds(2);
 
         private DateTime NextReportTimeUtc { get; set; }
         private DateTime MinAcceptableTimeStampUtc { get; set; }
@@ -31,9 +35,12 @@ namespace Sawmill.Application
 
         private LogEntryProvider LogEntryProvider { get; }
 
+        private AlertManager AlertManager { get; }
+
         public void Dispose()
         {
             this.LogEntryProvider.Dispose();
+            this.AlertManager.Alert -= this.AlertManager_Alert;
         }
 
         public void Run(CancellationToken cancellationToken)
@@ -57,6 +64,7 @@ namespace Sawmill.Application
 
                 var utcNow = DateTime.UtcNow;
                 this.ReportIfRequired(utcNow);
+                this.AlertManager.Update(utcNow);
 
                 //Console.WriteLine($"NowUtc: {utcNow.ToString("mm:ss.fff")}, NextReportTime: {this.NextReportTimeUtc.ToString("mm:ss.fff")}, {string.Join(", ", this.PeriodicStatistics.Select(s => $"{s.PeriodStartUtc.ToString("mm:ss.fff")}-{s.PeriodEndUtc.ToString("mm:ss.fff")}"))}");
             }
@@ -66,6 +74,8 @@ namespace Sawmill.Application
         {
             var utcNow = DateTime.UtcNow;
             this.UpdateNextReportTime(utcNow);
+
+            this.AlertManager.Initialize(utcNow);
         }
 
         private void WaitForData()
@@ -125,6 +135,8 @@ namespace Sawmill.Application
 
                 statistics.Process(logEntry);
             }
+
+            this.AlertManager.Process(logEntry);
         }
 
         private void ReportIfRequired(DateTime utcNow)
@@ -153,6 +165,8 @@ namespace Sawmill.Application
 
         private void Report(string name, StatisticsProcessor statistics, DateTime now)
         {
+            return;
+
             if (Console.CursorLeft != 0)
             {
                 Console.WriteLine();
@@ -171,6 +185,24 @@ namespace Sawmill.Application
             }
 
             Console.WriteLine(sb.ToString());
+        }
+
+        private void AlertManager_Alert(object sender, AlertEventArgs e)
+        {
+            if(e.AlertEvent == AlertEvent.Raised)
+            {
+                var color = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"High traffic generated an alert - hits = {e.HitsCount}, triggered at {e.TimeStamp.ToLongTimeString()}");
+                Console.ForegroundColor = color;
+            }
+            else if(e.AlertEvent == AlertEvent.Canceled)
+            {
+                var color = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"Recovered from the altert - hits = {e.HitsCount}, triggered at {e.TimeStamp.ToLongTimeString()}");
+                Console.ForegroundColor = color;
+            }
         }
     }
 }

@@ -1,10 +1,18 @@
 ﻿using Sawmill.Common.Extensions;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Sawmill.Common.DataStructures
 {
-    public class IntervalDictionary<T>
+    public class IntervalDictionary<T> : IEnumerable<T>
     {
+        public IntervalDictionary(DateTime start, TimeSpan duration, TimeSpan interval)
+            : this(start, interval, (int)(duration.Ticks / interval.Ticks))
+        {
+        }
+
         public IntervalDictionary(DateTime start, TimeSpan interval, int count)
         {
             this.Interval = interval.Ticks >= 0
@@ -33,20 +41,20 @@ namespace Sawmill.Common.DataStructures
             set => this.SetData(dateTime, value);
         }
 
-        public void MoveStartDate(DateTime newStart)
+        public void MoveStartDate(DateTime newStart, Func<T, T> reset = null)
         {
             var newStartUtc = newStart.ToUniversalTime().Floor(this.Interval);
             var timeOffset = newStartUtc - this.StartUtc;
             var offset = (int)(timeOffset.Ticks / this.Interval.Ticks);
-            this.ShiftArray(offset);
+            this.ShiftArray(offset, reset);
             this.StartUtc = newStartUtc;
         }
 
-        private void ShiftArray(int offset)
+        private void ShiftArray(int offset, Func<T, T> reset = null)
         {
             if (offset <= -this.Count || offset >= this.Count)
             {
-                this.Reset();
+                this.Reset(reset);
                 return;
             }
             else if (offset < 0)
@@ -57,7 +65,7 @@ namespace Sawmill.Common.DataStructures
                     arrayIndex += this.Count;
                 }
 
-                this.Reset(arrayIndex, -offset);
+                this.Reset(arrayIndex, -offset, reset);
             }
             else if (offset == 0)
             {
@@ -65,7 +73,7 @@ namespace Sawmill.Common.DataStructures
             }
             else if(offset < this.Count)
             {
-                this.Reset(this.IndexOffset, offset);
+                this.Reset(this.IndexOffset, offset, reset);
             }
 
             this.ShiftIndex(offset);
@@ -87,13 +95,13 @@ namespace Sawmill.Common.DataStructures
             this.IndexOffset = newOffset;
         }
 
-        private void Reset()
+        private void Reset(Func<T, T> reset = null)
         {
+            this.Reset(this.IndexOffset, this.Count, reset);
             this.IndexOffset = 0;
-            Array.Clear(this.Data, 0, this.Count);
         }
 
-        private void Reset(int arrayIndex, int count)
+        private void Reset(int arrayIndex, int count, Func<T, T> reset = null)
         {
             if(count < 0 || count > this.Count)
             {
@@ -114,8 +122,23 @@ namespace Sawmill.Common.DataStructures
                 headCount = 0;
             }
 
-            Array.Clear(this.Data, arrayIndex, tailCount);
-            Array.Clear(this.Data, 0, headCount);
+            if (reset != null)
+            {
+                for (var i = arrayIndex; i < arrayIndex + tailCount; i++)
+                {
+                    this.Data[i] = reset(this.Data[i]);
+                }
+
+                for (var i = 0; i < headCount; i++)
+                {
+                    this.Data[i] = reset(this.Data[i]);
+                }
+            }
+            else
+            {
+                Array.Clear(this.Data, arrayIndex, tailCount);
+                Array.Clear(this.Data, 0, headCount);
+            }
         }
 
         private T GetData(DateTime date)
@@ -189,6 +212,16 @@ namespace Sawmill.Common.DataStructures
 
             var index = arrayIndex - this.IndexOffset;
             return index >= 0 ? index : index + this.Count;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return this.Data.Skip(this.IndexOffset).Concat(this.Data.Take(this.IndexOffset)).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
     }
 }

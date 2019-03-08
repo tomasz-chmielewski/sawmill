@@ -28,5 +28,10 @@ namespace Sawmill.Common.Extensions
         {
             return (int)(timeSpan.Ticks / 10_000);
         }
+
+        public static int TotalSecondsAsInt(this TimeSpan timeSpan)
+        {
+            return (int)(timeSpan.Ticks / 10_000_000);
+        }
     }
 }

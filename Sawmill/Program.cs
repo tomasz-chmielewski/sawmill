@@ -28,6 +28,7 @@ namespace Sawmill
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(e.Message);
+                    Console.WriteLine(e.StackTrace);
                     Console.ReadKey(true);
                 }
             }
