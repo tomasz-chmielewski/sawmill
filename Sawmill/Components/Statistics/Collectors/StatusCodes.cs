@@ -1,8 +1,8 @@
-﻿using Sawmill.Models;
-using Sawmill.Statistics.Collectors.Abstractions;
+﻿using Sawmill.Components.Statistics.Collectors.Abstractions;
+using Sawmill.Models;
 using System.Globalization;
 
-namespace Sawmill.Statistics.Collectors
+namespace Sawmill.Components.Statistics.Collectors
 {
     public class StatusCodes : IStatisticsCollector
     {

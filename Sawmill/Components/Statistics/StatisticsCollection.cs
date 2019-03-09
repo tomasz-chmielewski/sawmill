@@ -1,11 +1,12 @@
-﻿using Sawmill.Models;
-using Sawmill.Statistics.Collectors.Abstractions;
+﻿using Sawmill.Components.Statistics.Abstractions;
+using Sawmill.Components.Statistics.Collectors.Abstractions;
+using Sawmill.Models;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace Sawmill.Statistics
+namespace Sawmill.Components.Statistics
 {
-    public class StatisticsCollection : ReadOnlyCollection<IStatisticsCollector>
+    public class StatisticsCollection : ReadOnlyCollection<IStatisticsCollector>, IStatisticsCollection
     {
         public StatisticsCollection(IList<IStatisticsCollector> list)
             : base(list)

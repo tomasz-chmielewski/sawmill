@@ -1,12 +1,12 @@
-﻿using Sawmill.Models;
-using Sawmill.Statistics.Collectors.Abstractions;
+﻿using Sawmill.Components.Statistics.Collectors.Abstractions;
+using Sawmill.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace Sawmill.Statistics.Collectors
+namespace Sawmill.Components.Statistics.Collectors
 {
     public class UrlSections : IStatisticsCollector
     {
@@ -18,7 +18,7 @@ namespace Sawmill.Statistics.Collectors
         public string Name { get; }
         public string Value => this.GetValue();
 
-        private Dictionary<string, int> Mapping = new Dictionary<string, int>();
+        public Dictionary<string, int> Mapping { get; } = new Dictionary<string, int>();
 
         public bool Process(LogEntry logEntry)
         {

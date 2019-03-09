@@ -1,8 +1,8 @@
-﻿using Sawmill.Alerts;
-using Sawmill.Common.Extensions;
+﻿using Sawmill.Common.Extensions;
+using Sawmill.Components.Alerts.Abstractions;
+using Sawmill.Components.Statistics.Abstractions;
 using Sawmill.Models;
 using Sawmill.Providers;
-using Sawmill.Statistics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,20 +13,20 @@ namespace Sawmill.Application
 {
     public class SawmillApplication : IDisposable
     {
-        public SawmillApplication()
+        public SawmillApplication(IAlertManager alertManager, IStatisticsManager statistiscManager)
         {
             this.LogEntryProvider = new LogEntryProvider();
 
-            this.StatisticsManager = new StatisticsManager();
-            this.AlertManager = new AlertManager();
+            this.StatisticsManager = statistiscManager ?? throw new ArgumentNullException(nameof(statistiscManager));
+            this.AlertManager = alertManager ?? throw new ArgumentNullException(nameof(alertManager));
         }
 
         private TimeSpan FetchInterval { get; } = TimeSpan.FromMilliseconds(500);
 
         private LogEntryProvider LogEntryProvider { get; }
 
-        private StatisticsManager StatisticsManager { get; }
-        private AlertManager AlertManager { get; }
+        private IStatisticsManager StatisticsManager { get; }
+        private IAlertManager AlertManager { get; }
 
         public void Dispose()
         {

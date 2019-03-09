@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Sawmill.Components.Alerts.Abstractions;
+using System;
 
-namespace Sawmill.Alerts
+namespace Sawmill.Components.Alerts
 {
-    public class AlertHandler
+    public class AlertHandler : IAlertHandler
     {
         public void RaiseAlert(DateTime timeStamp, int hitCount)
         {

@@ -1,11 +1,12 @@
-﻿using Sawmill.Statistics.Collectors.Abstractions;
+﻿using Sawmill.Components.Statistics.Abstractions;
+using Sawmill.Components.Statistics.Collectors.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sawmill.Statistics
+namespace Sawmill.Components.Statistics
 {
-    public class ReportHandler
+    public class ReportHandler : IReportHandler
     {
         public void Report(IEnumerable<IStatisticsCollector> globalStatistics, DateTime startUtc, TimeSpan duration, IEnumerable<IStatisticsCollector> periodicStatistics)
         {

@@ -1,11 +1,12 @@
-﻿using Sawmill.Statistics.Collectors;
-using Sawmill.Statistics.Collectors.Abstractions;
+﻿using Sawmill.Components.Statistics.Abstractions;
+using Sawmill.Components.Statistics.Collectors;
+using Sawmill.Components.Statistics.Collectors.Abstractions;
 
-namespace Sawmill.Statistics
+namespace Sawmill.Components.Statistics
 {
-    public class StatisticsCollectionFactory
+    public class StatisticsCollectionFactory : IStatisticsCollectionFactory
     {
-        public StatisticsCollection Create()
+        public IStatisticsCollection Create()
         {
             return new StatisticsCollection(
                 new IStatisticsCollector[]

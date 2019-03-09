@@ -1,15 +1,16 @@
 ﻿using Sawmill.Common.Extensions;
+using Sawmill.Components.Alerts.Abstractions;
 using Sawmill.Models;
 using System;
 using System.Collections.Generic;
 
-namespace Sawmill.Alerts
+namespace Sawmill.Components.Alerts
 {
-    public class AlertManager
+    public class AlertManager : IAlertManager
     {
-        public AlertManager()
+        public AlertManager(IAlertHandler alertHandler)
         {
-            this.AlertHandler = new AlertHandler();
+            this.AlertHandler = alertHandler ?? throw new ArgumentNullException(nameof(alertHandler));
         }
 
         // TODO: Create class Period { Start, Duction, End } ??
@@ -26,7 +27,7 @@ namespace Sawmill.Alerts
         private Dictionary<DateTime, int> HistoricalHitCount { get; } = new Dictionary<DateTime, int>();
 
         private bool HasAlert { get; set; }
-        private AlertHandler AlertHandler { get; }
+        private IAlertHandler AlertHandler { get; }
 
         public void Initialize(DateTime utcNow)
         {

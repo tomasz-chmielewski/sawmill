@@ -1,6 +1,6 @@
 ﻿using Sawmill.Models;
 
-namespace Sawmill.Statistics.Collectors.Abstractions
+namespace Sawmill.Components.Statistics.Collectors.Abstractions
 {
     public interface IStatisticsCollector
     {

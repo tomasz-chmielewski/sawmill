@@ -1,4 +1,6 @@
 ﻿using Sawmill.Application;
+using Sawmill.Components.Alerts;
+using Sawmill.Components.Statistics;
 using System;
 using System.Threading;
 
@@ -18,7 +20,7 @@ namespace Sawmill
 
                 try
                 {
-                    using (var application = new SawmillApplication())
+                    using (var application = new SawmillApplication(new AlertManager(new AlertHandler()), new StatisticsManager(new ReportHandler(), new StatisticsCollectionFactory())))
                     {
                         application.Run(cancellationTokenSource.Token);
                     }

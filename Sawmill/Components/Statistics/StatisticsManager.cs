@@ -1,17 +1,18 @@
 ﻿using Sawmill.Common.Extensions;
+using Sawmill.Components.Statistics.Abstractions;
 using Sawmill.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Sawmill.Statistics
+namespace Sawmill.Components.Statistics
 {
-    public class StatisticsManager
+    public class StatisticsManager : IStatisticsManager
     {
-        public StatisticsManager()
+        public StatisticsManager(IReportHandler reportHandler, IStatisticsCollectionFactory statisticsFactory)
         {
-            this.ReportHandler = new ReportHandler();
-            this.StatisticsFactory = new StatisticsCollectionFactory();
+            this.ReportHandler = reportHandler ?? throw new ArgumentNullException(nameof(reportHandler));
+            this.StatisticsFactory = statisticsFactory ?? throw new ArgumentNullException(nameof(statisticsFactory));
 
             this.GlobalStatistics = this.StatisticsFactory.Create();
         }
@@ -26,11 +27,11 @@ namespace Sawmill.Statistics
 
         private TimeSpan Delay => TimeSpan.FromSeconds(1);
 
-        private StatisticsCollection GlobalStatistics { get; }
-        private Dictionary<DateTime, StatisticsCollection> PeriodicStatistics { get; } = new Dictionary<DateTime, StatisticsCollection>();
+        private IStatisticsCollection GlobalStatistics { get; }
+        private Dictionary<DateTime, IStatisticsCollection> PeriodicStatistics { get; } = new Dictionary<DateTime, IStatisticsCollection>();
 
-        private ReportHandler ReportHandler { get; }
-        private StatisticsCollectionFactory StatisticsFactory { get; }
+        private IReportHandler ReportHandler { get; }
+        private IStatisticsCollectionFactory StatisticsFactory { get; }
 
         public void Initialize(DateTime utcNow)
         {
