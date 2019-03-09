@@ -1,6 +1,4 @@
 ﻿using Sawmill.Application;
-using Sawmill.Components.Alerts;
-using Sawmill.Components.Statistics;
 using System;
 using System.Threading;
 
@@ -20,18 +18,20 @@ namespace Sawmill
 
                 try
                 {
-                    using (var application = new SawmillApplication(new AlertManager(new AlertHandler()), new StatisticsManager(new ReportHandler(), new StatisticsCollectionFactory())))
+                    using (var appFactory = new SawmillApplicationFactory())
+                    using (var app = appFactory.Create())
                     {
-                        application.Run(cancellationTokenSource.Token);
+                        app.Run(cancellationTokenSource.Token);
                     }
                 }
                 catch (OperationCanceledException) { }
                 catch (Exception e)
                 {
+                    var color = Console.ForegroundColor;
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(e.Message);
                     Console.WriteLine(e.StackTrace);
-                    Console.ReadKey(true);
+                    Console.ForegroundColor = color;
                 }
             }
         }

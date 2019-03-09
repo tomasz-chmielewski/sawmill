@@ -1,4 +1,5 @@
-﻿using Sawmill.Common.Extensions;
+﻿using Sawmill.Application.Abstractions;
+using Sawmill.Common.Extensions;
 using Sawmill.Components.Alerts.Abstractions;
 using Sawmill.Components.Statistics.Abstractions;
 using Sawmill.Models;
@@ -11,7 +12,7 @@ using System.Threading;
 
 namespace Sawmill.Application
 {
-    public class SawmillApplication : IDisposable
+    public sealed class SawmillApplication : ISawmillApplication
     {
         public SawmillApplication(IAlertManager alertManager, IStatisticsManager statistiscManager)
         {
