@@ -18,7 +18,7 @@ namespace Sawmill.Components.Alerts
         private TimeSpan MonitoredPeriodDuration { get; } = TimeSpan.FromSeconds(10);
         private DateTime MonitoredPeriodEndUtc => this.MonitoredPeriodStartUtc + this.MonitoredPeriodDuration;
 
-        private TimeSpan Delay => TimeSpan.FromSeconds(5);
+        private TimeSpan Delay => TimeSpan.FromSeconds(1);
 
         private int HitsPerSecondsThreshold { get; } = 5;
         private int HitCountThreshold => HitsPerSecondsThreshold * MonitoredPeriodDuration.TotalSecondsAsInt();
