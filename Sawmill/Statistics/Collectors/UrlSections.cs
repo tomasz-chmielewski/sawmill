@@ -20,7 +20,7 @@ namespace Sawmill.Statistics.Collectors
 
         private Dictionary<string, int> Mapping = new Dictionary<string, int>();
 
-        public void Process(LogEntry logEntry)
+        public bool Process(LogEntry logEntry)
         {
             var section = this.GetSection(logEntry);
 
@@ -32,6 +32,8 @@ namespace Sawmill.Statistics.Collectors
             {
                 this.Mapping[section] = 1;
             }
+
+            return true;
         }
 
         private string GetSection(LogEntry logEntry)
@@ -51,7 +53,7 @@ namespace Sawmill.Statistics.Collectors
                 : section;
         }
 
-        public string GetValue()
+        private string GetValue()
         {
             var sb = new StringBuilder();
             var isFirstSection = true;

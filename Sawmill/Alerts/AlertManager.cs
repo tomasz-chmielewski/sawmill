@@ -2,7 +2,6 @@
 using Sawmill.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Sawmill.Alerts
 {
@@ -13,17 +12,18 @@ namespace Sawmill.Alerts
             this.AlertHandler = new AlertHandler();
         }
 
+        // TODO: Create class Period { Start, Duction, End } ??
         private DateTime MonitoredPeriodStartUtc { get; set; }
         private TimeSpan MonitoredPeriodDuration { get; } = TimeSpan.FromSeconds(10);
         private DateTime MonitoredPeriodEndUtc => this.MonitoredPeriodStartUtc + this.MonitoredPeriodDuration;
 
-        private TimeSpan Delay => TimeSpan.FromSeconds(1);
+        private TimeSpan Delay => TimeSpan.FromSeconds(5);
 
         private int HitsPerSecondsThreshold { get; } = 5;
         private int HitCountThreshold => HitsPerSecondsThreshold * MonitoredPeriodDuration.TotalSecondsAsInt();
 
         private int MonitoredPeriodHitCount { get; set; }
-        private Dictionary<DateTime, int> HitCount { get; } = new Dictionary<DateTime, int>();
+        private Dictionary<DateTime, int> HistoricalHitCount { get; } = new Dictionary<DateTime, int>();
 
         private bool HasAlert { get; set; }
         private AlertHandler AlertHandler { get; }
@@ -44,13 +44,13 @@ namespace Sawmill.Alerts
                 else if (logEntry.TimeStampUtc >= this.MonitoredPeriodEndUtc)
                 {
                     var key = logEntry.TimeStampUtc.Floor(TimeSpan.FromSeconds(1));
-                    if (this.HitCount.TryGetValue(key, out var value))
+                    if (this.HistoricalHitCount.TryGetValue(key, out var value))
                     {
-                        this.HitCount[key] = value + 1;
+                        this.HistoricalHitCount[key] = value + 1;
                     }
                     else
                     {
-                        this.HitCount[key] = 1;
+                        this.HistoricalHitCount[key] = 1;
                     }
                 }
             }
@@ -66,18 +66,18 @@ namespace Sawmill.Alerts
             {
                 while(newStartUtc > this.MonitoredPeriodStartUtc)
                 {
-                    if(this.HitCount.Count == 0)
+                    if(this.HistoricalHitCount.Count == 0)
                     {
                         this.MonitoredPeriodStartUtc = newStartUtc;
                         break;
                     }
 
-                    if(this.HitCount.Remove(this.MonitoredPeriodStartUtc, out var value))
+                    if(this.HistoricalHitCount.Remove(this.MonitoredPeriodStartUtc, out var value))
                     {
                         this.MonitoredPeriodHitCount -= value;
                     }
 
-                    if (this.HitCount.TryGetValue(this.MonitoredPeriodEndUtc, out value))
+                    if (this.HistoricalHitCount.TryGetValue(this.MonitoredPeriodEndUtc, out value))
                     {
                         this.MonitoredPeriodHitCount += value;
                     }
@@ -87,11 +87,11 @@ namespace Sawmill.Alerts
                     this.CheckForAlert(this.MonitoredPeriodEndUtc);
                 }
 
-                Console.WriteLine($"Alert hits: {this.MonitoredPeriodHitCount} ({string.Join(", ", this.HitCount.OrderByDescending(x => x.Key).Select(x => x.Value))})");
+                //Console.WriteLine($"Alert hits: {this.MonitoredPeriodHitCount} ({string.Join(", ", this.HistoricalHitCount.OrderByDescending(x => x.Key).Select(x => x.Value))})");
             }
             else if(newStartUtc < this.MonitoredPeriodStartUtc)
             {
-                throw new ArgumentException(nameof(utcNow));
+                throw new ArgumentException("Cannot move the monitored period to the past", nameof(utcNow));
             }
         }
 

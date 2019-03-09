@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace Sawmill
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {

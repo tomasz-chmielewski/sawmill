@@ -7,6 +7,6 @@ namespace Sawmill.Statistics.Collectors.Abstractions
         string Name { get; }
         string Value { get; }
 
-        void Process(LogEntry logEntry);
+        bool Process(LogEntry logEntry);
     }
 }

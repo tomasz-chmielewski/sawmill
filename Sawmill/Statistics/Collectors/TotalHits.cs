@@ -16,9 +16,10 @@ namespace Sawmill.Statistics.Collectors
 
         private int TotalHist { get; set; }
 
-        public void Process(LogEntry logEntry)
+        public bool Process(LogEntry logEntry)
         {
             this.TotalHist++;
+            return true;
         }
     }
 }

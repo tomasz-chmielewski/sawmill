@@ -20,12 +20,15 @@ namespace Sawmill.Statistics.Collectors
         private int Max { get; }
         private int Hits { get; set; }
 
-        public void Process(LogEntry logEntry)
+        public bool Process(LogEntry logEntry)
         {
-            if(logEntry.Status >= this.Min && logEntry.Status <= this.Max)
+            if(logEntry.Status < this.Min || logEntry.Status > this.Max)
             {
-                this.Hits++;
+                return false;
             }
+
+            this.Hits++;
+            return true;
         }
     }
 }
