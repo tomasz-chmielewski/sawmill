@@ -1,9 +1,10 @@
 ﻿using Sawmill.Common.Extensions;
+using Sawmill.Models.Abstractions;
 using System;
 
 namespace Sawmill.Models
 {
-    public class LogEntryRequest
+    public class LogEntryRequest : ILogEntryRequest
     {
         public string Method { get; private set; }
         public Uri Uri { get; private set; }

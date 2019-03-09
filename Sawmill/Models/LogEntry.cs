@@ -1,11 +1,12 @@
 ﻿using Sawmill.Common.Extensions;
+using Sawmill.Models.Abstractions;
 using System;
 using System.Globalization;
 using System.Net;
 
 namespace Sawmill.Models
 {
-    public class LogEntry
+    public class LogEntry : ILogEntry
     {
         private const string TimeStampFormat = "dd/MMM/yyyy:HH:mm:ss zzz";
         private const char MissingValue = '-';
@@ -17,6 +18,8 @@ namespace Sawmill.Models
         public LogEntryRequest Request { get; private set; }
         public int Status { get; private set; }
         public int? ObjectSize { get; private set; }
+
+        ILogEntryRequest ILogEntry.Request => this.Request;
 
         public static bool TryParse(ReadOnlySpan<char> span, out LogEntry result)
         {

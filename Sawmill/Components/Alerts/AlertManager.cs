@@ -1,6 +1,7 @@
-﻿using Sawmill.Common.Extensions;
+﻿using Microsoft.Extensions.Options;
+using Sawmill.Common.Extensions;
 using Sawmill.Components.Alerts.Abstractions;
-using Sawmill.Models;
+using Sawmill.Models.Abstractions;
 using System;
 using System.Collections.Generic;
 
@@ -8,19 +9,24 @@ namespace Sawmill.Components.Alerts
 {
     public class AlertManager : IAlertManager
     {
-        public AlertManager(IAlertHandler alertHandler)
+        public AlertManager(IOptions<AlertManagerOptions> optionsAccessor, IAlertHandler alertHandler)
         {
             this.AlertHandler = alertHandler ?? throw new ArgumentNullException(nameof(alertHandler));
+
+            AlertManagerOptions options = optionsAccessor.Value;
+            this.MonitoredPeriodDuration = TimeSpan.FromSeconds(options.MonitoredPeriodSeconds);
+            this.Delay = TimeSpan.FromSeconds(options.DelaySeconds);
+            this.HitsPerSecondsThreshold = options.HitsPerSecondsThreshold;
         }
 
         // TODO: Create class Period { Start, Duction, End } ??
         private DateTime MonitoredPeriodStartUtc { get; set; }
-        private TimeSpan MonitoredPeriodDuration { get; } = TimeSpan.FromSeconds(10);
+        private TimeSpan MonitoredPeriodDuration { get; }
         private DateTime MonitoredPeriodEndUtc => this.MonitoredPeriodStartUtc + this.MonitoredPeriodDuration;
 
-        private TimeSpan Delay => TimeSpan.FromSeconds(1);
+        private TimeSpan Delay { get; }
 
-        private int HitsPerSecondsThreshold { get; } = 5;
+        private int HitsPerSecondsThreshold { get; }
         private int HitCountThreshold => HitsPerSecondsThreshold * MonitoredPeriodDuration.TotalSecondsAsInt();
 
         private int MonitoredPeriodHitCount { get; set; }
@@ -34,12 +40,13 @@ namespace Sawmill.Components.Alerts
             this.MonitoredPeriodStartUtc = this.GetMonitoredPeriodStartUtc(utcNow);
         }
 
-        public void Process(DateTime utcNow, IEnumerable<LogEntry> logEntries)
+        public void Process(DateTime utcNow, IEnumerable<ILogEntry> logEntries)
         {
             foreach (var logEntry in logEntries)
             {
                 if (this.IsWithinMonitoredPeriod(logEntry.TimeStampUtc))
                 {
+                    // TODO: throw AggregateException ??
                     // throw new InvalidOperationException("");
                 }
                 else if (logEntry.TimeStampUtc >= this.MonitoredPeriodEndUtc)

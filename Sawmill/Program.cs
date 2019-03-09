@@ -18,7 +18,7 @@ namespace Sawmill
 
                 try
                 {
-                    using (var appFactory = new SawmillApplicationFactory())
+                    using (var appFactory = new SawmillApplicationFactory(args))
                     using (var app = appFactory.Create())
                     {
                         app.Run(cancellationTokenSource.Token);
