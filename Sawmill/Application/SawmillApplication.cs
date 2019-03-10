@@ -22,7 +22,7 @@ namespace Sawmill.Application
             this.AlertManager = alertManager ?? throw new ArgumentNullException(nameof(alertManager));
         }
 
-        private TimeSpan FetchInterval { get; } = TimeSpan.FromMilliseconds(500);
+        private TimeSpan FetchInterval { get; } = TimeSpanEx.FromMillisecondsInt(500);
 
         private LogEntryProvider LogEntryProvider { get; }
 

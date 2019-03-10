@@ -21,11 +21,11 @@ namespace Sawmill.Components.Statistics
         private DateTime GlobalStatisticsStartUtc { get; set; }
 
         private DateTime MonitoredPeriodStartUtc { get; set; }
-        private TimeSpan MonitoredPeriodDuration { get; } = TimeSpan.FromSeconds(10);
+        private TimeSpan MonitoredPeriodDuration { get; } = TimeSpanEx.FromSecondsInt(10);
         private DateTime MonitoredPeriodEndUtc => this.MonitoredPeriodStartUtc + this.MonitoredPeriodDuration;
         private DateTime ReportTimeUtc => this.MonitoredPeriodEndUtc + this.Delay;
 
-        private TimeSpan Delay => TimeSpan.FromSeconds(1);
+        private TimeSpan Delay => TimeSpanEx.FromSecondsInt(1);
 
         private IStatisticsCollection GlobalStatistics { get; }
         private Dictionary<DateTime, IStatisticsCollection> PeriodicStatistics { get; } = new Dictionary<DateTime, IStatisticsCollection>();
