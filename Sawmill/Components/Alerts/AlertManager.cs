@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using Sawmill.Common.DateAndTime;
 using Sawmill.Common.DateAndTime.Extensions;
 using Sawmill.Components.Alerts.Abstractions;
 using Sawmill.Models.Abstractions;
@@ -14,20 +15,16 @@ namespace Sawmill.Components.Alerts
             this.AlertHandler = alertHandler ?? throw new ArgumentNullException(nameof(alertHandler));
 
             AlertManagerOptions options = optionsAccessor.Value;
-            this.MonitoredPeriodDuration = TimeSpanEx.FromSecondsInt(options.MonitoredPeriodSeconds);
+            this.MonitoredPeriodUtc.Duration = TimeSpanEx.FromSecondsInt(options.MonitoredPeriodSeconds);
             this.Delay = TimeSpanEx.FromSecondsInt(options.DelaySeconds);
             this.HitsPerSecondsThreshold = options.HitsPerSecondsThreshold;
         }
 
-        // TODO: Create class Period { Start, Duction, End } ??
-        private DateTime MonitoredPeriodStartUtc { get; set; }
-        private TimeSpan MonitoredPeriodDuration { get; }
-        private DateTime MonitoredPeriodEndUtc => this.MonitoredPeriodStartUtc + this.MonitoredPeriodDuration;
-
+        private TimePeriod MonitoredPeriodUtc { get; } = new TimePeriod();
         private TimeSpan Delay { get; }
 
         private int HitsPerSecondsThreshold { get; }
-        private int HitCountThreshold => HitsPerSecondsThreshold * MonitoredPeriodDuration.TotalSecondsAsInt();
+        private int HitCountThreshold => HitsPerSecondsThreshold * this.MonitoredPeriodUtc.Duration.TotalSecondsAsInt();
 
         private int MonitoredPeriodHitCount { get; set; }
         private Dictionary<DateTime, int> HistoricalHitCount { get; } = new Dictionary<DateTime, int>();
@@ -37,7 +34,7 @@ namespace Sawmill.Components.Alerts
 
         public void Initialize(DateTime utcNow)
         {
-            this.MonitoredPeriodStartUtc = this.GetMonitoredPeriodStartUtc(utcNow);
+            this.MonitoredPeriodUtc.Start = this.GetMonitoredPeriodStartUtc(utcNow);
         }
 
         public int Process(DateTime utcNow, IEnumerable<ILogEntry> logEntries)
@@ -46,7 +43,7 @@ namespace Sawmill.Components.Alerts
 
             foreach (var logEntry in logEntries)
             {
-                if (logEntry.TimeStampUtc >= this.MonitoredPeriodEndUtc)
+                if (logEntry.TimeStampUtc >= this.MonitoredPeriodUtc.End)
                 {
                     var key = logEntry.TimeStampUtc.FloorSeconds(1);
                     if (this.HistoricalHitCount.TryGetValue(key, out var value))
@@ -71,34 +68,34 @@ namespace Sawmill.Components.Alerts
         {
             var newStartUtc = this.GetMonitoredPeriodStartUtc(utcNow);
 
-            if (newStartUtc > this.MonitoredPeriodStartUtc)
+            if (newStartUtc > this.MonitoredPeriodUtc.Start)
             {
-                while(newStartUtc > this.MonitoredPeriodStartUtc)
+                while(newStartUtc > this.MonitoredPeriodUtc.Start)
                 {
                     if(this.HistoricalHitCount.Count == 0)
                     {
-                        this.MonitoredPeriodStartUtc = newStartUtc;
+                        this.MonitoredPeriodUtc.Start = newStartUtc;
                         break;
                     }
 
-                    if(this.HistoricalHitCount.Remove(this.MonitoredPeriodStartUtc, out var value))
+                    if(this.HistoricalHitCount.Remove(this.MonitoredPeriodUtc.Start, out var value))
                     {
                         this.MonitoredPeriodHitCount -= value;
                     }
 
-                    if (this.HistoricalHitCount.TryGetValue(this.MonitoredPeriodEndUtc, out value))
+                    if (this.HistoricalHitCount.TryGetValue(this.MonitoredPeriodUtc.End, out value))
                     {
                         this.MonitoredPeriodHitCount += value;
                     }
 
-                    this.MonitoredPeriodStartUtc += TimeSpanEx.FromSecondsInt(1);
+                    this.MonitoredPeriodUtc.Start += TimeSpanEx.FromSecondsInt(1);
 
-                    this.CheckForAlert(this.MonitoredPeriodEndUtc);
+                    this.CheckForAlert(this.MonitoredPeriodUtc.End);
                 }
 
                 //Console.WriteLine($"Alert hits: {this.MonitoredPeriodHitCount} ({string.Join(", ", this.HistoricalHitCount.OrderByDescending(x => x.Key).Select(x => x.Value))})");
             }
-            else if(newStartUtc < this.MonitoredPeriodStartUtc)
+            else if(newStartUtc < this.MonitoredPeriodUtc.Start)
             {
                 throw new InvalidOperationException("Cannot move the monitored period to the past");
             }
@@ -106,12 +103,12 @@ namespace Sawmill.Components.Alerts
 
         private DateTime GetMonitoredPeriodStartUtc(DateTime utcNow)
         {
-            return utcNow.FloorSeconds(1) - this.MonitoredPeriodDuration - this.Delay;
+            return utcNow.FloorSeconds(1) - this.MonitoredPeriodUtc.Duration - this.Delay;
         }
 
         private bool IsWithinMonitoredPeriod(DateTime utc)
         {
-            return utc >= this.MonitoredPeriodStartUtc && utc < this.MonitoredPeriodEndUtc;
+            return utc >= this.MonitoredPeriodUtc.Start && utc < this.MonitoredPeriodUtc.End;
         }
 
         private void CheckForAlert(DateTime timeStamp)

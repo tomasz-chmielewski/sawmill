@@ -4,6 +4,10 @@ namespace Sawmill.Common.DateAndTime
 {
     public class TimePeriod
     {
+        public TimePeriod()
+        {
+        }
+
         public TimePeriod(DateTime start, TimeSpan duration)
         {
             this.Start = start;
