@@ -3,7 +3,6 @@ using Sawmill.Components.Statistics.Abstractions;
 using Sawmill.Components.Statistics.Collectors.Abstractions;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Sawmill.Components.Statistics
 {
@@ -29,19 +28,25 @@ namespace Sawmill.Components.Statistics
             var startString = start.ToLongTimeString();
             var endString = end != null ? end.Value.ToLongTimeString() : new string(' ', startString.Length);
 
-            var sb = new StringBuilder();
-            sb.Append(FormattableString.Invariant($"[{startString}-{endString}]"));
-
-            foreach (var collector in statistics)
+            var color = Console.ForegroundColor;
+            try
             {
-                sb.Append(" ");
-                sb.Append(collector.Name);
-                sb.Append("(");
-                sb.Append(collector.Value);
-                sb.Append(")");
-            }
+                Console.Write($"[{startString}-{endString}]");
 
-            Console.WriteLine(sb.ToString());
+                foreach (var collector in statistics)
+                {
+                    Console.Write(", ");
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.Write(collector.Name);
+                    Console.ForegroundColor = color;
+                    Console.Write(": ");
+                    Console.Write(collector.Value);
+                }
+            }
+            finally
+            {
+                Console.ForegroundColor = color;
+            }
         }
     }
 }
