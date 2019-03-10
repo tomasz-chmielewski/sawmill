@@ -1,9 +1,9 @@
 ﻿using Sawmill.Application.Abstractions;
 using Sawmill.Common.DateAndTime.Extensions;
 using Sawmill.Components.Alerts.Abstractions;
+using Sawmill.Components.Providers.Abstractions;
 using Sawmill.Components.Statistics.Abstractions;
-using Sawmill.Models;
-using Sawmill.Providers;
+using Sawmill.Data.Models.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,18 +14,21 @@ namespace Sawmill.Application
 {
     public sealed class SawmillApplication : ISawmillApplication
     {
-        public SawmillApplication(IAlertManager alertManager, IStatisticsManager statistiscManager)
+        public SawmillApplication(
+            ILogEntryProvider logEntryProvider, 
+            IAlertManager alertManager, 
+            IStatisticsManager statistiscManager)
         {
-            this.LogEntryProvider = new LogEntryProvider();
-
             this.StatisticsManager = statistiscManager ?? throw new ArgumentNullException(nameof(statistiscManager));
             this.AlertManager = alertManager ?? throw new ArgumentNullException(nameof(alertManager));
+            this.LogEntryProvider = logEntryProvider ?? throw new ArgumentNullException(nameof(logEntryProvider));
         }
 
+        private TimeSpan OpenProviderDelay { get; } = TimeSpanEx.FromMillisecondsInt(1000);
         private TimeSpan FetchInterval { get; } = TimeSpanEx.FromMillisecondsInt(500);
+        private int BatchSize { get; } = 1000;
 
-        private LogEntryProvider LogEntryProvider { get; }
-
+        private ILogEntryProvider LogEntryProvider { get; }
         private IStatisticsManager StatisticsManager { get; }
         private IAlertManager AlertManager { get; }
 
@@ -36,21 +39,29 @@ namespace Sawmill.Application
 
         public void Run(CancellationToken cancellationToken)
         {
-            Initialize();
-
-            while (true)
+            try
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                this.WaitForProvider(cancellationToken);
+                this.Initialize();
 
-                var logEntries = this.Fetch().ToList();
-                var utcNow = DateTime.UtcNow;
-
-                this.Process(utcNow, logEntries);
-
-                if (logEntries.Count == 0)
+                while (true)
                 {
-                    this.WaitForData();
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var logEntries = this.Fetch().ToList();
+
+                    var utcNow = DateTime.UtcNow;
+                    this.Process(utcNow, logEntries);
+
+                    if (logEntries.Count == 0)
+                    {
+                        this.WaitForData();
+                    }
                 }
+            }
+            finally
+            {
+                this.LogEntryProvider.Close();
             }
         }
 
@@ -60,6 +71,26 @@ namespace Sawmill.Application
 
             this.StatisticsManager.Initialize(utcNow);
             this.AlertManager.Initialize(utcNow);
+        }
+
+        private void WaitForProvider(CancellationToken cancellationToken)
+        {
+            while(true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                try
+                {
+                    this.LogEntryProvider.Open();
+                    Console.WriteLine($"Reading from \"{this.LogEntryProvider.Path}\"");
+                    return;
+                }
+                catch(IOException e) when (e is FileNotFoundException || e is DirectoryNotFoundException || e is DriveNotFoundException)
+                {
+                    Console.WriteLine(e.Message);
+                    Thread.Sleep(this.OpenProviderDelay);
+                }
+            }
         }
 
         private void WaitForData()
@@ -74,22 +105,9 @@ namespace Sawmill.Application
             }
         }
 
-        private IEnumerable<LogEntry> Fetch()
+        private IEnumerable<ILogEntry> Fetch()
         {
-            try
-            {
-                return this.TryFetch();
-            }
-            catch (FileNotFoundException e)
-            {
-                Console.WriteLine(e.Message);
-                return Enumerable.Empty<LogEntry>();
-            }
-        }
-
-        private IEnumerable<LogEntry> TryFetch()
-        {
-            for (var i = 0; i < 100; i++)
+            for (var i = 0; i < this.BatchSize; i++)
             {
                 var logEntry = this.LogEntryProvider.GetEntry();
                 if(logEntry == null)
@@ -101,7 +119,7 @@ namespace Sawmill.Application
             }
         }
 
-        private void Process(DateTime utcNow, IEnumerable<LogEntry> logEntries)
+        private void Process(DateTime utcNow, IEnumerable<ILogEntry> logEntries)
         {
             this.StatisticsManager.Process(utcNow, logEntries);
             this.AlertManager.Process(utcNow, logEntries);

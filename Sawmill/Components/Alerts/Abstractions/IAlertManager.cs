@@ -1,4 +1,4 @@
-﻿using Sawmill.Models.Abstractions;
+﻿using Sawmill.Data.Models.Abstractions;
 using System;
 using System.Collections.Generic;
 

@@ -1,4 +1,5 @@
-﻿using Sawmill.Components.Statistics.Abstractions;
+﻿using Microsoft.Extensions.Options;
+using Sawmill.Components.Statistics.Abstractions;
 using Sawmill.Components.Statistics.Collectors;
 using Sawmill.Components.Statistics.Collectors.Abstractions;
 
@@ -6,6 +7,13 @@ namespace Sawmill.Components.Statistics
 {
     public class StatisticsCollectionFactory : IStatisticsCollectionFactory
     {
+        public StatisticsCollectionFactory(IOptions<StatisticsCollectionOptions> options)
+        {
+            this.Options = options.Value;
+        }
+
+        private StatisticsCollectionOptions Options { get; }
+
         public IStatisticsCollection Create()
         {
             return new StatisticsCollection(
@@ -16,7 +24,7 @@ namespace Sawmill.Components.Statistics
                     new StatusCodes("3xx", 300, 399),
                     new StatusCodes("4xx", 400, 499),
                     new StatusCodes("5xx", 500, 599),
-                    new UrlSections("Sections")
+                    new UrlSections("Sections", this.Options.MaxUrlSectionCount)
                 });
         }
     }

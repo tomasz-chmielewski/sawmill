@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Sawmill.Application.Abstractions;
 using Sawmill.Components.Alerts;
 using Sawmill.Components.Alerts.Abstractions;
+using Sawmill.Components.Providers;
+using Sawmill.Components.Providers.Abstractions;
 using Sawmill.Components.Statistics;
 using Sawmill.Components.Statistics.Abstractions;
 using System.IO;
@@ -56,12 +57,17 @@ namespace Sawmill.Application
 
             var configuration = builder.Build();
 
+            services.Configure<LogEntryProviderOptions>(configuration.GetSection("Input"));
             services.Configure<AlertManagerOptions>(configuration.GetSection("Alerts"));
+            services.Configure<StatisticsOptions>(configuration.GetSection("Statistics"));
+            services.Configure<StatisticsCollectionOptions>(configuration.GetSection("Statistics"));
         }
 
         private void AddServices(IServiceCollection services)
         {
             services.AddSingleton<ISawmillApplication, SawmillApplication>();
+
+            services.AddTransient<ILogEntryProvider, LogEntryProvider>();
 
             services.AddTransient<IAlertManager, AlertManager>();
             services.AddTransient<IAlertHandler, AlertHandler>();

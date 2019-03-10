@@ -1,6 +1,6 @@
 ﻿using Sawmill.Components.Statistics.Abstractions;
 using Sawmill.Components.Statistics.Collectors.Abstractions;
-using Sawmill.Models.Abstractions;
+using Sawmill.Data.Models.Abstractions;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 

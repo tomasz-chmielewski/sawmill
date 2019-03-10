@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sawmill.Models.Abstractions
+namespace Sawmill.Data.Models.Abstractions
 {
     public interface ILogEntryRequest
     {

@@ -1,5 +1,5 @@
 ﻿using Sawmill.Components.Statistics.Collectors.Abstractions;
-using Sawmill.Models.Abstractions;
+using Sawmill.Data.Models.Abstractions;
 using System.Collections.Generic;
 
 namespace Sawmill.Components.Statistics.Abstractions

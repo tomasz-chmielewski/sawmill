@@ -8,8 +8,8 @@ namespace LogGenerator
 {
     public class Program
     {
-        private const string LogPath = @"C:\Users\tom_c\Downloads\access-log-sample.log";
-        private const int DelayMilliseconds = 100;
+        private const string LogPath = @"C:\tmp\access.log";
+        private const int DelayMilliseconds = 1;
 
         private static readonly Random Random = new Random();
 
@@ -52,7 +52,7 @@ namespace LogGenerator
 
                             var logEntry = GenerateLogEntry();
                             writer.WriteLine(logEntry);
-                            writer.Flush();
+                            //writer.Flush();
 
                             Thread.Sleep(DelayMilliseconds);
                         }

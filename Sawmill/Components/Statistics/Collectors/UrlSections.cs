@@ -1,5 +1,5 @@
 ﻿using Sawmill.Components.Statistics.Collectors.Abstractions;
-using Sawmill.Models.Abstractions;
+using Sawmill.Data.Models.Abstractions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,13 +11,16 @@ namespace Sawmill.Components.Statistics.Collectors
 {
     public class UrlSections : IStatisticsCollector, IEnumerable<IUrlSection>
     {
-        public UrlSections(string name)
+        public UrlSections(string name, int maxSectionCount)
         {
             this.Name = name;
+            this.MaxSectionCount = maxSectionCount;
         }
 
         public string Name { get; }
         public string Value => this.GetValue();
+
+        private int MaxSectionCount { get; }
 
         private Dictionary<string, UrlSection> Sections { get; } = new Dictionary<string, UrlSection>(StringComparer.Ordinal);
         private SortedDictionary<int, HashSet<UrlSection>> SectionIndex { get; } 
@@ -101,12 +104,12 @@ namespace Sawmill.Components.Statistics.Collectors
 
         private string GetValue()
         {
-            var sb = new StringBuilder();
+            var sb = new StringBuilder("[");
             var isFirstSection = true;
 
-            foreach (var section in this)
+            foreach (var section in this.Take(this.MaxSectionCount))
             {
-                if (!isFirstSection)
+                if(!isFirstSection)
                 {
                     sb.Append(", ");
                 }
@@ -117,6 +120,8 @@ namespace Sawmill.Components.Statistics.Collectors
 
                 isFirstSection = false;
             }
+
+            sb.Append("]");
 
             return sb.ToString();
         }

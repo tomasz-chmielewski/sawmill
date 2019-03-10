@@ -1,7 +1,8 @@
-﻿using Sawmill.Common.DateAndTime;
+﻿using Microsoft.Extensions.Options;
+using Sawmill.Common.DateAndTime;
 using Sawmill.Common.DateAndTime.Extensions;
 using Sawmill.Components.Statistics.Abstractions;
-using Sawmill.Models.Abstractions;
+using Sawmill.Data.Models.Abstractions;
 using System;
 using System.Collections.Generic;
 
@@ -9,18 +10,25 @@ namespace Sawmill.Components.Statistics
 {
     public class StatisticsManager : IStatisticsManager
     {
-        public StatisticsManager(IReportHandler reportHandler, IStatisticsCollectionFactory statisticsFactory)
+        public StatisticsManager(
+            IOptions<StatisticsOptions> optionsAccessor, 
+            IReportHandler reportHandler, 
+            IStatisticsCollectionFactory statisticsFactory)
         {
             this.ReportHandler = reportHandler ?? throw new ArgumentNullException(nameof(reportHandler));
             this.StatisticsFactory = statisticsFactory ?? throw new ArgumentNullException(nameof(statisticsFactory));
 
             this.GlobalStatistics = this.StatisticsFactory.Create();
+
+            var options = optionsAccessor.Value;
+            this.MonitoredPeriodUtc.Duration = TimeSpanEx.FromSecondsInt(options.MonitoredPeriodSeconds);
+            this.ReportDelay = TimeSpanEx.FromSecondsInt(options.ReportDelaySeconds);
         }
 
         private TimePeriod MonitoredPeriodUtc { get; } = new TimePeriod();
         private DateTime GlobalStatisticsStartUtc { get; set; }
-        private DateTime ReportTimeUtc => this.MonitoredPeriodUtc.End + this.Delay;
-        private TimeSpan Delay => TimeSpanEx.FromSecondsInt(1);
+        private DateTime ReportTimeUtc => this.MonitoredPeriodUtc.End + this.ReportDelay;
+        private TimeSpan ReportDelay { get; }
 
         private IStatisticsCollection GlobalStatistics { get; }
         private Dictionary<DateTime, IStatisticsCollection> PeriodicStatistics { get; } = new Dictionary<DateTime, IStatisticsCollection>();
@@ -97,7 +105,7 @@ namespace Sawmill.Components.Statistics
 
         private void Report(DateTime utcNow)
         {
-            var periodStartUtc = utcNow.Floor(this.MonitoredPeriodUtc.Duration) - this.MonitoredPeriodUtc.Duration;
+            var periodStartUtc = (utcNow - this.ReportDelay).Floor(this.MonitoredPeriodUtc.Duration) - this.MonitoredPeriodUtc.Duration;
 
             var periodicStatistics = this.PeriodicStatistics.TryGetValue(periodStartUtc, out var value)
                 ? value 
@@ -109,7 +117,7 @@ namespace Sawmill.Components.Statistics
 
         private DateTime GetMonitoredPeriodStartUtc(DateTime utcNow)
         {
-            return (utcNow - this.Delay).Floor(this.MonitoredPeriodUtc.Duration);
+            return (utcNow - this.ReportDelay).Floor(this.MonitoredPeriodUtc.Duration);
         }
     }
 }

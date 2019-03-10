@@ -25,23 +25,29 @@ namespace Sawmill.Components.Statistics
                 Console.WriteLine();
             }
 
-            var startString = start.ToLongTimeString();
-            var endString = end != null ? end.Value.ToLongTimeString() : new string(' ', startString.Length);
+            var startString = start.ToLocalTime().ToLongTimeString();
+            var endString = end != null ? end.Value.ToLocalTime().ToLongTimeString() : new string(' ', startString.Length);
 
             var color = Console.ForegroundColor;
             try
             {
                 Console.Write($"[{startString}-{endString}]");
 
+                bool isFirstCollector = true;
+
                 foreach (var collector in statistics)
                 {
-                    Console.Write(", ");
+                    Console.Write(isFirstCollector ? " " : ", ");
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.Write(collector.Name);
                     Console.ForegroundColor = color;
                     Console.Write(": ");
                     Console.Write(collector.Value);
+
+                    isFirstCollector = false;
                 }
+
+                Console.WriteLine();
             }
             finally
             {

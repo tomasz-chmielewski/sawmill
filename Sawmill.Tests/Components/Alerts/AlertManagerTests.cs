@@ -4,7 +4,7 @@ using NUnit.Framework;
 using Sawmill.Common.DateAndTime.Extensions;
 using Sawmill.Components.Alerts;
 using Sawmill.Components.Alerts.Abstractions;
-using Sawmill.Models.Abstractions;
+using Sawmill.Data.Models.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;

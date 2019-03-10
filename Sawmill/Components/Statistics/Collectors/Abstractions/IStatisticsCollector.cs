@@ -1,4 +1,4 @@
-﻿using Sawmill.Models.Abstractions;
+﻿using Sawmill.Data.Models.Abstractions;
 
 namespace Sawmill.Components.Statistics.Collectors.Abstractions
 {

@@ -1,27 +1,17 @@
-﻿using Sawmill.Common.DateAndTime.Extensions;
-using Sawmill.Models.Abstractions;
+﻿using Sawmill.Common.Extensions;
+using Sawmill.Data.Models;
 using System;
 using System.Globalization;
 using System.Net;
 
-namespace Sawmill.Models
+namespace Sawmill.Data
 {
-    public class LogEntry : ILogEntry
+    public class LogEntrySerializer
     {
         private const string TimeStampFormat = "dd/MMM/yyyy:HH:mm:ss zzz";
         private const char MissingValue = '-';
 
-        public IPAddress ClientAddress { get; private set; }
-        public string UserId { get; private set; }
-        public string UserName { get; private set; }
-        public DateTime TimeStampUtc { get; private set; }
-        public LogEntryRequest Request { get; private set; }
-        public int Status { get; private set; }
-        public int? ObjectSize { get; private set; }
-
-        ILogEntryRequest ILogEntry.Request => this.Request;
-
-        public static bool TryParse(ReadOnlySpan<char> span, out LogEntry result)
+        public bool TryParse(ReadOnlySpan<char> span, out LogEntry result)
         {
             span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> clientAddressPart);
             span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> userIdPart);
@@ -38,7 +28,7 @@ namespace Sawmill.Models
                 !TryParseTimeStamp(timeStampPart, out DateTime timeStampUtc) ||
                 !TryParseInt(statusPart, out int status) ||
                 !TryParseNullableInt(objectSizePart, out int? objectSize) ||
-                !LogEntryRequest.TryParse(requestPart, out LogEntryRequest request))
+                !this.TryParse(requestPart, out LogEntryRequest request))
             {
                 result = null;
                 return false;
@@ -58,24 +48,46 @@ namespace Sawmill.Models
             return true;
         }
 
-        private static string ParseName(ReadOnlySpan<char> span)
+        private bool TryParse(ReadOnlySpan<char> span, out LogEntryRequest result)
         {
-            return IsMissingValue(span) ? string.Empty : span.ToString();
+            span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> methodSpan);
+            span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> uriSpan);
+            span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> protocolSpan);
+
+            if (!Uri.TryCreate(uriSpan.ToString(), UriKind.RelativeOrAbsolute, out Uri uri))
+            {
+                result = null;
+                return false;
+            }
+
+            result = new LogEntryRequest
+            {
+                Method = methodSpan.ToString(),
+                Uri = uri,
+                Protocol = protocolSpan.ToString()
+            };
+
+            return true;
         }
 
-        private static bool TryParseTimeStamp(ReadOnlySpan<char> span, out DateTime timeStampUtc)
+        private string ParseName(ReadOnlySpan<char> span)
+        {
+            return this.IsMissingValue(span) ? string.Empty : span.ToString();
+        }
+
+        private bool TryParseTimeStamp(ReadOnlySpan<char> span, out DateTime timeStampUtc)
         {
             return DateTime.TryParseExact(span, TimeStampFormat, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out timeStampUtc);
         }
 
-        private static bool TryParseInt(ReadOnlySpan<char> span, out int result)
+        private bool TryParseInt(ReadOnlySpan<char> span, out int result)
         {
             return int.TryParse(span, NumberStyles.Integer, CultureInfo.InvariantCulture, out result);
         }
 
-        private static bool TryParseNullableInt(ReadOnlySpan<char> span, out int? result)
+        private bool TryParseNullableInt(ReadOnlySpan<char> span, out int? result)
         {
-            if(IsMissingValue(span))
+            if (this.IsMissingValue(span))
             {
                 result = null;
                 return true;
@@ -86,7 +98,7 @@ namespace Sawmill.Models
             return success;
         }
 
-        private static bool IsMissingValue(ReadOnlySpan<char> span)
+        private bool IsMissingValue(ReadOnlySpan<char> span)
         {
             return span.Length == 1 && span[0] == MissingValue;
         }
