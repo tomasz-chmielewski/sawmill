@@ -1,5 +1,5 @@
 ﻿using Sawmill.Components.Statistics.Collectors.Abstractions;
-using Sawmill.Models;
+using Sawmill.Models.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -18,9 +18,9 @@ namespace Sawmill.Components.Statistics.Collectors
         public string Name { get; }
         public string Value => this.GetValue();
 
-        public Dictionary<string, int> Mapping { get; } = new Dictionary<string, int>();
+        public SortedDictionary<string, int> Mapping { get; } = new SortedDictionary<string, int>();
 
-        public bool Process(LogEntry logEntry)
+        public bool Process(ILogEntry logEntry)
         {
             var section = this.GetSection(logEntry);
 
@@ -36,7 +36,7 @@ namespace Sawmill.Components.Statistics.Collectors
             return true;
         }
 
-        private string GetSection(LogEntry logEntry)
+        private string GetSection(ILogEntry logEntry)
         {
             var uri = logEntry.Request.Uri;
 

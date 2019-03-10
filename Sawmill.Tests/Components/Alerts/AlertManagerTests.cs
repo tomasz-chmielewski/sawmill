@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
-using Sawmill.Common.Extensions;
+using Sawmill.Common.DateAndTime.Extensions;
 using Sawmill.Components.Alerts;
 using Sawmill.Components.Alerts.Abstractions;
 using Sawmill.Models.Abstractions;

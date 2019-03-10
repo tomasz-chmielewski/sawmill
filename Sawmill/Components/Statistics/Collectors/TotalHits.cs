@@ -1,5 +1,5 @@
 ﻿using Sawmill.Components.Statistics.Collectors.Abstractions;
-using Sawmill.Models;
+using Sawmill.Models.Abstractions;
 using System.Globalization;
 
 namespace Sawmill.Components.Statistics.Collectors
@@ -16,7 +16,7 @@ namespace Sawmill.Components.Statistics.Collectors
 
         private int TotalHist { get; set; }
 
-        public bool Process(LogEntry logEntry)
+        public bool Process(ILogEntry logEntry)
         {
             this.TotalHist++;
             return true;

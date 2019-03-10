@@ -1,5 +1,5 @@
 ﻿using Sawmill.Components.Statistics.Collectors.Abstractions;
-using Sawmill.Models;
+using Sawmill.Models.Abstractions;
 using System.Globalization;
 
 namespace Sawmill.Components.Statistics.Collectors
@@ -20,7 +20,7 @@ namespace Sawmill.Components.Statistics.Collectors
         private int Max { get; }
         private int Hits { get; set; }
 
-        public bool Process(LogEntry logEntry)
+        public bool Process(ILogEntry logEntry)
         {
             if(logEntry.Status < this.Min || logEntry.Status > this.Max)
             {

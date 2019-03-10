@@ -1,11 +1,11 @@
 ﻿using Sawmill.Components.Statistics.Collectors.Abstractions;
-using Sawmill.Models;
+using Sawmill.Models.Abstractions;
 using System.Collections.Generic;
 
 namespace Sawmill.Components.Statistics.Abstractions
 {
     public interface IStatisticsCollection : IReadOnlyCollection<IStatisticsCollector>
     {
-        bool Process(LogEntry logEntry);
+        bool Process(ILogEntry logEntry);
     }
 }

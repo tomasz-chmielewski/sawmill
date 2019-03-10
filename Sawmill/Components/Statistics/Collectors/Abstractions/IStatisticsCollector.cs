@@ -1,4 +1,4 @@
-﻿using Sawmill.Models;
+﻿using Sawmill.Models.Abstractions;
 
 namespace Sawmill.Components.Statistics.Collectors.Abstractions
 {
@@ -7,6 +7,6 @@ namespace Sawmill.Components.Statistics.Collectors.Abstractions
         string Name { get; }
         string Value { get; }
 
-        bool Process(LogEntry logEntry);
+        bool Process(ILogEntry logEntry);
     }
 }

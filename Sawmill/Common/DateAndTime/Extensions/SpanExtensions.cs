@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sawmill.Common.Extensions
+namespace Sawmill.Common.DateAndTime.Extensions
 {
     public static class SpanExtensions
     {

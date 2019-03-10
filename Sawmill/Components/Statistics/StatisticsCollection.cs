@@ -1,6 +1,6 @@
 ﻿using Sawmill.Components.Statistics.Abstractions;
 using Sawmill.Components.Statistics.Collectors.Abstractions;
-using Sawmill.Models;
+using Sawmill.Models.Abstractions;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -13,7 +13,7 @@ namespace Sawmill.Components.Statistics
         {
         }
 
-        public bool Process(LogEntry logEntry)
+        public bool Process(ILogEntry logEntry)
         {
             var isProcessed = false;
             foreach (var collector in this)

@@ -1,9 +1,9 @@
-﻿using Sawmill.Common.Extensions;
+﻿using Sawmill.Common.DateAndTime;
+using Sawmill.Common.DateAndTime.Extensions;
 using Sawmill.Components.Statistics.Abstractions;
-using Sawmill.Models;
+using Sawmill.Models.Abstractions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Sawmill.Components.Statistics
 {
@@ -17,9 +17,9 @@ namespace Sawmill.Components.Statistics
             this.GlobalStatistics = this.StatisticsFactory.Create();
         }
 
-        // TODO: Create class Period { Start, Duction, End } ??
         private DateTime GlobalStatisticsStartUtc { get; set; }
 
+        // TODO: Create class Period { Start, Duction, End } ??
         private DateTime MonitoredPeriodStartUtc { get; set; }
         private TimeSpan MonitoredPeriodDuration { get; } = TimeSpanEx.FromSecondsInt(10);
         private DateTime MonitoredPeriodEndUtc => this.MonitoredPeriodStartUtc + this.MonitoredPeriodDuration;
@@ -36,18 +36,16 @@ namespace Sawmill.Components.Statistics
         public void Initialize(DateTime utcNow)
         {
             this.MonitoredPeriodStartUtc = this.GetMonitoredPeriodStartUtc(utcNow);
+            this.GlobalStatisticsStartUtc = this.MonitoredPeriodStartUtc;
         }
 
-        public void Process(DateTime utcNow, IEnumerable<LogEntry> logEntries)
+        public int Process(DateTime utcNow, IEnumerable<ILogEntry> logEntries)
         {
+            var processedRequests = 0;
+
             foreach (var logEntry in logEntries)
             {
-                if(logEntry.TimeStampUtc < this.MonitoredPeriodStartUtc)
-                {
-                    // log is too old
-                    // throw new InvalidOperationException("");
-                }
-                else
+                if(logEntry.TimeStampUtc >= this.MonitoredPeriodStartUtc)
                 {
                     this.GlobalStatistics.Process(logEntry);
 
@@ -62,12 +60,16 @@ namespace Sawmill.Components.Statistics
                         this.PeriodicStatistics[key] = statistics;
                         statistics.Process(logEntry);
 
-                        Console.WriteLine($"[{utcNow.ToLocalTime().ToLongTimeString()}] Statistics history: {string.Join(", ", this.PeriodicStatistics.OrderBy(x => x.Key).Select(x => $"[{x.Key.ToLongTimeString()}-{(x.Key + this.MonitoredPeriodDuration).ToLongTimeString()}]"))}");
+                        //Console.WriteLine($"[{utcNow.ToLocalTime().ToLongTimeString()}] Statistics history: {string.Join(", ", this.PeriodicStatistics.OrderBy(x => x.Key).Select(x => $"[{x.Key.ToLongTimeString()}-{(x.Key + this.MonitoredPeriodDuration).ToLongTimeString()}]"))}");
                     }
+
+                    processedRequests++;
                 }
             }
 
             this.UpdateMonitoredPeriod(utcNow);
+
+            return processedRequests;
         }
 
         private void UpdateMonitoredPeriod(DateTime utcNow)
@@ -89,12 +91,12 @@ namespace Sawmill.Components.Statistics
                     this.PeriodicStatistics.Remove(this.MonitoredPeriodStartUtc);
                     this.MonitoredPeriodStartUtc += this.MonitoredPeriodDuration;
 
-                    Console.WriteLine($"[{utcNow.ToLocalTime().ToLongTimeString()}] Statistics history: {string.Join(", ", this.PeriodicStatistics.OrderBy(x => x.Key).Select(x => $"[{x.Key.ToLongTimeString()}-{(x.Key + this.MonitoredPeriodDuration).ToLongTimeString()}]"))}");
+                    //Console.WriteLine($"[{utcNow.ToLocalTime().ToLongTimeString()}] Statistics history: {string.Join(", ", this.PeriodicStatistics.OrderBy(x => x.Key).Select(x => $"[{x.Key.ToLongTimeString()}-{(x.Key + this.MonitoredPeriodDuration).ToLongTimeString()}]"))}");
                 }
             }
             else if (utcNow < this.MonitoredPeriodStartUtc)
             {
-                throw new ArgumentException(nameof(utcNow));
+                throw new InvalidOperationException("Cannot move the monitored period to the past");
             }
         }
 
@@ -106,7 +108,8 @@ namespace Sawmill.Components.Statistics
                 ? value 
                 : this.StatisticsFactory.Create();
 
-            this.ReportHandler.Report(this.GlobalStatistics, periodStartUtc, this.MonitoredPeriodDuration, periodicStatistics);
+            this.ReportHandler.Report(this.GlobalStatisticsStartUtc, this.GlobalStatistics);
+            this.ReportHandler.Report(new TimePeriod(periodStartUtc, this.MonitoredPeriodDuration), periodicStatistics);
         }
 
         private DateTime GetMonitoredPeriodStartUtc(DateTime utcNow)
