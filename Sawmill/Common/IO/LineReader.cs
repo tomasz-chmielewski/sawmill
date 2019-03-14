@@ -1,69 +1,77 @@
-﻿using System.IO;
-using System.Text;
+﻿using System;
+using System.IO;
 
 namespace Sawmill.Common.IO
 {
     public class LineReader : StreamReader
     {
-        public LineReader(Stream stream) : base(stream, Encoding.ASCII)
+        public LineReader(Stream stream) : base(stream)
         {
         }
 
-        public LineReader(Stream stream, int bufferSize) : base(stream, Encoding.ASCII, false, bufferSize)
-        {
-        }
-
-        private string data = string.Empty;
         private int position = 0;
         private int lineStartPosition = 0;
-        private bool skipNewLineChars = true;
+        private bool acceptLine = true;
 
-        private char[] Buffer { get; } = new char[1024];
-        private int BufferPosition { get; set; } = 0;
+        private char[] Buffer { get; } = new char[1024 + 1];
+        private int DataLength { get; set; } = 0;
 
         public override string ReadLine()
         {
             do
             {
-                for (; this.position < this.data.Length; this.position++)
+                while(this.position < this.DataLength)
                 {
-                    var c = this.data[this.position];
+                    var c = this.Buffer[this.position];
                     if (c == '\n' || c == '\r')
                     {
-                        if(this.skipNewLineChars)
+                        if((this.lineStartPosition == this.position) || !this.acceptLine)
                         {
-                            this.lineStartPosition = this.position + 1;
+                            this.position++;
+                            this.lineStartPosition = this.position;
+                            this.acceptLine = true;
                             continue;
                         }
 
-                        var line = this.data.Substring(this.lineStartPosition, this.position - this.lineStartPosition);
+                        var line = new string(this.Buffer, this.lineStartPosition, this.position - this.lineStartPosition);
 
-                        this.data = this.data.Substring(this.position + 1);
-                        this.skipNewLineChars = true;
-                        this.lineStartPosition = 0;
-                        this.position = 0;
+                        this.position++;
+                        this.lineStartPosition = this.position;
 
                         return line;
                     }
-                    else
-                    {
-                        this.skipNewLineChars = false;
-                    }
+
+                    this.position++;
                 }
             }
-            while (this.FeedData() > 0);
+            while (this.FeedBuffer() > 0);
 
             return null;
         }
 
-        private int FeedData()
+        private int FeedBuffer()
         {
-            var charCount = base.Read(this.Buffer, 0, this.Buffer.Length);
-            if(charCount > 0)
+            if(this.position == this.Buffer.Length)
             {
-                this.data += new string(this.Buffer, 0, charCount);
+                if (this.lineStartPosition > 0)
+                {
+                    Array.Copy(this.Buffer, this.lineStartPosition, this.Buffer, 0, this.position - this.lineStartPosition);
+                    this.acceptLine = true;
+                    this.position -= this.lineStartPosition;
+                    this.lineStartPosition = 0;
+                    this.DataLength = this.position;
+                }
+                else
+                {
+                    this.acceptLine = false;
+                    this.position = 0;
+                    this.lineStartPosition = 0;
+                    this.DataLength = 0;
+                }
             }
 
+            var charCount = base.Read(this.Buffer, this.position, this.Buffer.Length - this.position);
+            this.DataLength += charCount;
             return charCount;
         }
     }
