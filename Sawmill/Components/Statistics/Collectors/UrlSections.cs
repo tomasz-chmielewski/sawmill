@@ -87,19 +87,12 @@ namespace Sawmill.Components.Statistics.Collectors
 
         private string GetSectionPath(ILogEntry logEntry)
         {
-            var uri = logEntry.Request.Uri;
+            var uri = logEntry.Request.Uri.ToString().AsSpan();
 
-            // convert to absolute uri, because Uri.Segments doesn't work with relative uris
-            var absoluteUri = uri.IsAbsoluteUri ? uri : new Uri(new Uri("http://dummy"), uri);
-            var segmentCount = absoluteUri.Segments.Length;
+            var firstSlash = uri.IndexOf('/');
+            var secondSlash = firstSlash != -1 && firstSlash + 1 < uri.Length ? uri.Slice(firstSlash + 1).IndexOf('/') : -1;
 
-            // take no more then 2 first segments
-            var path = string.Concat(absoluteUri.Segments.Take(Math.Min(2, segmentCount)));
-
-            // remove "/" from the end if there are more then one secions
-            return segmentCount > 1 && path[path.Length - 1] == '/' 
-                ? path.Remove(path.Length - 1)
-                : path;
+            return (secondSlash != -1 ? uri.Slice(0, firstSlash + secondSlash + 1) : uri).ToString();
         }
 
         private string GetValue()
