@@ -40,9 +40,11 @@ namespace LogGenerator
 
                 try
                 {
-                    using (var sinkStream = File.Open(LogPath, FileMode.Create, FileAccess.Write, FileShare.Read))
+                    using (var sinkStream = File.Open(LogPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read))
                     using (var writer = new StreamWriter(sinkStream, Encoding.ASCII))
                     {
+                        sinkStream.Seek(0, SeekOrigin.End);
+
                         Console.WriteLine($"Writing to \"{sinkStream.Name}\"");
 
                         while (true)
@@ -54,7 +56,7 @@ namespace LogGenerator
                             writer.WriteLine(logEntry);
                             //writer.Flush();
 
-                            Thread.Sleep(DelayMilliseconds);
+                            //Thread.Sleep(DelayMilliseconds);
                         }
                     }
                 }

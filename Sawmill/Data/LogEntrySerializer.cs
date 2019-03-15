@@ -77,6 +77,7 @@ namespace Sawmill.Data
 
         private bool TryParseTimeStamp(ReadOnlySpan<char> span, out DateTime timeStampUtc)
         {
+            // TODO: Create a custom parse method to improve performance
             return DateTime.TryParseExact(span, TimeStampFormat, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out timeStampUtc);
         }
 

@@ -5,43 +5,48 @@ namespace Sawmill.Common.IO
 {
     public class LineReader : StreamReader
     {
-        public LineReader(Stream stream) : base(stream)
+        public LineReader(Stream stream, int maxLineLength) : base(stream)
         {
+            this.MaxLineLength = maxLineLength > 0 
+                ? maxLineLength 
+                : throw new ArgumentException($"{nameof(maxLineLength)} must be greater then zero.", nameof(maxLineLength));
+
+            this.Buffer = new char[maxLineLength + 1];
         }
 
-        private int position = 0;
-        private int lineStartPosition = 0;
-        private bool acceptLine = true;
-
-        private char[] Buffer { get; } = new char[1024 + 1];
-        private int DataLength { get; set; } = 0;
+        private int MaxLineLength { get; }
+        private char[] Buffer { get; }
+        private int DataLength { get; set; }
+        private int Position { get; set; }
+        private int LineStartPosition { get; set; }
+        private bool AcceptLine { get; set; } = true;
 
         public override string ReadLine()
         {
             do
             {
-                while(this.position < this.DataLength)
+                while(this.Position < this.DataLength)
                 {
-                    var c = this.Buffer[this.position];
+                    var c = this.Buffer[this.Position];
                     if (c == '\n' || c == '\r')
                     {
-                        if((this.lineStartPosition == this.position) || !this.acceptLine)
+                        if((this.LineStartPosition == this.Position) || !this.AcceptLine)
                         {
-                            this.position++;
-                            this.lineStartPosition = this.position;
-                            this.acceptLine = true;
+                            this.Position++;
+                            this.LineStartPosition = this.Position;
+                            this.AcceptLine = true;
                             continue;
                         }
 
-                        var line = new string(this.Buffer, this.lineStartPosition, this.position - this.lineStartPosition);
+                        var line = new string(this.Buffer, this.LineStartPosition, this.Position - this.LineStartPosition);
 
-                        this.position++;
-                        this.lineStartPosition = this.position;
+                        this.Position++;
+                        this.LineStartPosition = this.Position;
 
                         return line;
                     }
 
-                    this.position++;
+                    this.Position++;
                 }
             }
             while (this.FeedBuffer() > 0);
@@ -51,28 +56,40 @@ namespace Sawmill.Common.IO
 
         private int FeedBuffer()
         {
-            if(this.position == this.Buffer.Length)
+            if(this.Position == this.Buffer.Length)
             {
-                if (this.lineStartPosition > 0)
+                if (this.LineStartPosition > 0)
                 {
-                    Array.Copy(this.Buffer, this.lineStartPosition, this.Buffer, 0, this.position - this.lineStartPosition);
-                    this.acceptLine = true;
-                    this.position -= this.lineStartPosition;
-                    this.lineStartPosition = 0;
-                    this.DataLength = this.position;
+                    this.AcceptLine = true;
+                    this.ShiftData();
                 }
                 else
                 {
-                    this.acceptLine = false;
-                    this.position = 0;
-                    this.lineStartPosition = 0;
-                    this.DataLength = 0;
+                    this.AcceptLine = false;
+                    this.ResetBuffer();
+
+                    throw new InvalidDataException($"Line is longer then {this.MaxLineLength} characters.");
                 }
             }
 
-            var charCount = base.Read(this.Buffer, this.position, this.Buffer.Length - this.position);
+            var charCount = base.Read(this.Buffer, this.Position, this.Buffer.Length - this.Position);
             this.DataLength += charCount;
             return charCount;
+        }
+
+        private void ShiftData()
+        {
+            Array.Copy(this.Buffer, this.LineStartPosition, this.Buffer, 0, this.Position - this.LineStartPosition);
+            this.Position -= this.LineStartPosition;
+            this.LineStartPosition = 0;
+            this.DataLength = this.Position;
+        }
+
+        private void ResetBuffer()
+        {
+            this.Position = 0;
+            this.LineStartPosition = 0;
+            this.DataLength = 0;
         }
     }
 }

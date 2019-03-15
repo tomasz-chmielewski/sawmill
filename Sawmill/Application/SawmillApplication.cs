@@ -48,6 +48,7 @@ namespace Sawmill.Application
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
+                    // TODO: Process line by line and call UpdateMonitoredPeriod() when there is no data
                     var logEntries = this.Fetch().ToList();
 
                     var utcNow = DateTime.UtcNow;
@@ -95,6 +96,8 @@ namespace Sawmill.Application
 
         private void WaitForData()
         {
+            // TODO: use FileSystemWatcher class instead of Thread.Sleep()
+
             var utcNow = DateTime.UtcNow;
             var nextFetchTime = utcNow.Ceiling(this.FetchInterval);
             var millisecondsToWait = (nextFetchTime - utcNow).TotalMillisecondsAsInt() + 1;

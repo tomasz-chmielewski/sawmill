@@ -15,9 +15,12 @@ namespace Sawmill.Components.Providers
         {
             var options = optionsAccessor.Value;
             this.Path = options.Path;
+            this.MaxLineLength = options.MaxLineLength;
         }
 
         public string Path { get; }
+
+        private int MaxLineLength { get; }
 
         private LineReader Reader { get; set; }
         private LogEntrySerializer Serializer { get; } = new LogEntrySerializer();
@@ -38,7 +41,9 @@ namespace Sawmill.Components.Providers
             try
             {
                 fileStream = File.Open(this.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                this.Reader = new LineReader(fileStream);
+                fileStream.Seek(0, SeekOrigin.End);
+
+                this.Reader = new LineReader(fileStream, this.MaxLineLength);
             }
             catch
             {
@@ -58,15 +63,32 @@ namespace Sawmill.Components.Providers
 
         public ILogEntry GetEntry()
         {
-            var line = this.Reader.ReadLine();
+            var line = this.TryReadLine();
             if (line == null)
             {
                 return null;
             }
 
-            return Serializer.TryParse(line, out LogEntry logEntry)
+            return this.Serializer.TryParse(line, out LogEntry logEntry)
                 ? logEntry 
                 : null;
+        }
+
+        private string TryReadLine()
+        {
+            try
+            {
+                return this.Reader.ReadLine();
+            }
+            catch(InvalidDataException e)
+            {
+                var color = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(e.Message);
+                Console.ForegroundColor = color;
+
+                return null;
+            }
         }
     }
 }
