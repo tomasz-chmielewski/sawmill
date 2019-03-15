@@ -56,7 +56,7 @@ namespace LogGenerator
                             writer.WriteLine(logEntry);
                             //writer.Flush();
 
-                            //Thread.Sleep(DelayMilliseconds);
+                            Thread.Sleep(DelayMilliseconds);
                         }
                     }
                 }

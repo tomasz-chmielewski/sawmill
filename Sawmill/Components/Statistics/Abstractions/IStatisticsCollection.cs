@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Sawmill.Components.Statistics.Abstractions
 {
-    public interface IStatisticsCollection : IReadOnlyCollection<IStatisticsCollector>
+    public interface IStatisticsCollection : IEnumerable<IStatisticsCollector>
     {
         bool Process(ILogEntry logEntry);
     }

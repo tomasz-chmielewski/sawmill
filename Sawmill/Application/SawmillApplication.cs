@@ -26,7 +26,7 @@ namespace Sawmill.Application
 
         private TimeSpan OpenProviderDelay { get; } = TimeSpanEx.FromMillisecondsInt(1000);
         private TimeSpan FetchInterval { get; } = TimeSpanEx.FromMillisecondsInt(500);
-        private int BatchSize { get; } = 1000;
+        private int BatchSize { get; } = 100;
 
         private ILogEntryProvider LogEntryProvider { get; }
         private IStatisticsManager StatisticsManager { get; }

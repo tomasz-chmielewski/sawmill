@@ -10,15 +10,11 @@ namespace Sawmill.Components.Statistics
 {
     public class StatisticsManager : IStatisticsManager
     {
-        public StatisticsManager(
-            IOptions<StatisticsOptions> optionsAccessor, 
-            IReportHandler reportHandler, 
-            IStatisticsCollectionFactory statisticsFactory)
+        public StatisticsManager(IOptions<StatisticsOptions> optionsAccessor, IReportHandler reportHandler)
         {
             this.ReportHandler = reportHandler ?? throw new ArgumentNullException(nameof(reportHandler));
-            this.StatisticsFactory = statisticsFactory ?? throw new ArgumentNullException(nameof(statisticsFactory));
 
-            this.GlobalStatistics = this.StatisticsFactory.Create();
+            this.GlobalStatistics = new StatisticsCollection();
 
             var options = optionsAccessor.Value;
             this.MonitoredPeriodUtc.Duration = TimeSpanEx.FromSecondsInt(options.MonitoredPeriodSeconds);
@@ -30,11 +26,10 @@ namespace Sawmill.Components.Statistics
         private DateTime ReportTimeUtc => this.MonitoredPeriodUtc.End + this.ReportDelay;
         private TimeSpan ReportDelay { get; }
 
-        private IStatisticsCollection GlobalStatistics { get; }
-        private Dictionary<DateTime, IStatisticsCollection> PeriodicStatistics { get; } = new Dictionary<DateTime, IStatisticsCollection>();
+        private StatisticsCollection GlobalStatistics { get; }
+        private Dictionary<DateTime, StatisticsCollection> PeriodicStatistics { get; } = new Dictionary<DateTime, StatisticsCollection>();
 
         private IReportHandler ReportHandler { get; }
-        private IStatisticsCollectionFactory StatisticsFactory { get; }
 
         public void Initialize(DateTime utcNow)
         {
@@ -59,11 +54,9 @@ namespace Sawmill.Components.Statistics
                     }
                     else
                     {
-                        statistics = this.StatisticsFactory.Create();
+                        statistics = new StatisticsCollection();
                         this.PeriodicStatistics[key] = statistics;
                         statistics.Process(logEntry);
-
-                        //Console.WriteLine($"[{utcNow.ToLocalTime().ToLongTimeString()}] Statistics history: {string.Join(", ", this.PeriodicStatistics.OrderBy(x => x.Key).Select(x => $"[{x.Key.ToLongTimeString()}-{(x.Key + this.MonitoredPeriodUtc.Duration).ToLongTimeString()}]"))}");
                     }
 
                     processedRequests++;
@@ -93,26 +86,29 @@ namespace Sawmill.Components.Statistics
 
                     this.PeriodicStatistics.Remove(this.MonitoredPeriodUtc.Start);
                     this.MonitoredPeriodUtc.Start += this.MonitoredPeriodUtc.Duration;
-
-                    //Console.WriteLine($"[{utcNow.ToLocalTime().ToLongTimeString()}] Statistics history: {string.Join(", ", this.PeriodicStatistics.OrderBy(x => x.Key).Select(x => $"[{x.Key.ToLongTimeString()}-{(x.Key + this.MonitoredPeriodUtc.Duration).ToLongTimeString()}]"))}");
                 }
             }
             else if (utcNow < this.MonitoredPeriodUtc.Start)
             {
-                throw new InvalidOperationException("Cannot move the monitored period to the past");
+                throw new InvalidOperationException("Cannot move the monitored period to the past.");
             }
         }
 
         private void Report(DateTime utcNow)
         {
-            var periodStartUtc = (utcNow - this.ReportDelay).Floor(this.MonitoredPeriodUtc.Duration) - this.MonitoredPeriodUtc.Duration;
+            var periodEndUtc = (utcNow - this.ReportDelay).Floor(this.MonitoredPeriodUtc.Duration);
+            var periodStartUtc = periodEndUtc - this.MonitoredPeriodUtc.Duration;
 
             var periodicStatistics = this.PeriodicStatistics.TryGetValue(periodStartUtc, out var value)
-                ? value 
-                : this.StatisticsFactory.Create();
+                ? value
+                : new StatisticsCollection();
 
-            this.ReportHandler.Report(this.GlobalStatisticsStartUtc, this.GlobalStatistics);
-            this.ReportHandler.Report(new TimePeriod(periodStartUtc, this.MonitoredPeriodUtc.Duration), periodicStatistics);
+            var globalReport = new ReportItem(this.GlobalStatisticsStartUtc, null, this.GlobalStatistics);
+            var periodicReport = new ReportItem(periodStartUtc, periodEndUtc, periodicStatistics);
+
+            var report = new Report(globalReport, periodicReport);
+
+            this.ReportHandler.HandleReport(report);
         }
 
         private DateTime GetMonitoredPeriodStartUtc(DateTime utcNow)

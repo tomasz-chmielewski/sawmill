@@ -60,7 +60,7 @@ namespace Sawmill.Application
             services.Configure<LogEntryProviderOptions>(configuration.GetSection("Input"));
             services.Configure<AlertManagerOptions>(configuration.GetSection("Alerts"));
             services.Configure<StatisticsOptions>(configuration.GetSection("Statistics"));
-            services.Configure<StatisticsCollectionOptions>(configuration.GetSection("Statistics"));
+            services.Configure<ReportHandlerOptions>(configuration.GetSection("Statistics"));
         }
 
         private void AddServices(IServiceCollection services)
@@ -73,7 +73,6 @@ namespace Sawmill.Application
             services.AddTransient<IAlertHandler, AlertHandler>();
 
             services.AddTransient<IStatisticsManager, StatisticsManager>();
-            services.AddTransient<IStatisticsCollectionFactory, StatisticsCollectionFactory>();
             services.AddTransient<IReportHandler, ReportHandler>();
         }
     }

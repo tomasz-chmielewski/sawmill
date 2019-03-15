@@ -1,33 +1,26 @@
 ﻿using Sawmill.Components.Statistics.Collectors.Abstractions;
 using Sawmill.Data.Models.Abstractions;
-using System.Globalization;
 
 namespace Sawmill.Components.Statistics.Collectors
 {
     public class StatusCodes : IStatisticsCollector
     {
-        public StatusCodes(string name, int min, int max)
-        {
-            this.Name = name;
-            this.Min = min;
-            this.Max = max;
-        }
+        private readonly int[] hits = new int[4];
 
-        public string Name { get; }
-        public string Value => Hits.ToString(CultureInfo.InvariantCulture);
-
-        private int Min { get; }
-        private int Max { get; }
-        private int Hits { get; set; }
+        public int Hits2xx => this.hits[0];
+        public int Hits3xx => this.hits[0];
+        public int Hits4xx => this.hits[0];
+        public int Hits5xx => this.hits[0];
 
         public bool Process(ILogEntry logEntry)
         {
-            if(logEntry.Status < this.Min || logEntry.Status > this.Max)
+            var index = (logEntry.Status - 200) / 100;
+            if(index < 0 || index >= this.hits.Length)
             {
                 return false;
             }
 
-            this.Hits++;
+            this.hits[index]++;
             return true;
         }
     }

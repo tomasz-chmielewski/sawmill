@@ -3,28 +3,17 @@ using Sawmill.Data.Models.Abstractions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 
 namespace Sawmill.Components.Statistics.Collectors
 {
     public class UrlSections : IStatisticsCollector, IEnumerable<IUrlSection>
     {
-        public UrlSections(string name, int maxSectionCount)
-        {
-            this.Name = name;
-            this.MaxSectionCount = maxSectionCount;
-        }
+        private Dictionary<string, UrlSection> Sections { get; } 
+            = new Dictionary<string, UrlSection>(StringComparer.Ordinal);
 
-        public string Name { get; }
-        public string Value => this.GetValue();
-
-        private int MaxSectionCount { get; }
-
-        private Dictionary<string, UrlSection> Sections { get; } = new Dictionary<string, UrlSection>(StringComparer.Ordinal);
-        private SortedDictionary<int, HashSet<UrlSection>> SectionIndex { get; } 
-            = new SortedDictionary<int, HashSet<UrlSection>>(Comparer<int>.Create((a, b) => a > b ? -1 : a < b ? 1 : 0));
+        private SortedDictionary<int, HashSet<UrlSection>> SectionIndex { get; }
+            = new SortedDictionary<int, HashSet<UrlSection>>(Comparer<int>.Create((a, b) => b.CompareTo(a)));
 
         public bool Process(ILogEntry logEntry)
         {
@@ -93,30 +82,6 @@ namespace Sawmill.Components.Statistics.Collectors
             var secondSlash = firstSlash != -1 && firstSlash + 1 < uri.Length ? uri.Slice(firstSlash + 1).IndexOf('/') : -1;
 
             return (secondSlash != -1 ? uri.Slice(0, firstSlash + secondSlash + 1) : uri).ToString();
-        }
-
-        private string GetValue()
-        {
-            var sb = new StringBuilder("[");
-            var isFirstSection = true;
-
-            foreach (var section in this.Take(this.MaxSectionCount))
-            {
-                if(!isFirstSection)
-                {
-                    sb.Append(", ");
-                }
-
-                sb.Append(section.Path);
-                sb.Append(": ");
-                sb.Append(section.HitCount.ToString(CultureInfo.InvariantCulture));
-
-                isFirstSection = false;
-            }
-
-            sb.Append("]");
-
-            return sb.ToString();
         }
 
         private class UrlSection : IUrlSection

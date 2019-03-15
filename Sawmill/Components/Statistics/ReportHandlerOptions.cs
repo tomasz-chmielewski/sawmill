@@ -1,6 +1,6 @@
 ﻿namespace Sawmill.Components.Statistics
 {
-    public class StatisticsCollectionOptions
+    public class ReportHandlerOptions
     {
         public int MaxUrlSectionCount { get; set; } = 5;
     }

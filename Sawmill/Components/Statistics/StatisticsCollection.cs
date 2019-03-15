@@ -1,17 +1,16 @@
-﻿using Sawmill.Components.Statistics.Abstractions;
+﻿using Sawmill.Components.Statistics.Collectors;
 using Sawmill.Components.Statistics.Collectors.Abstractions;
 using Sawmill.Data.Models.Abstractions;
+using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace Sawmill.Components.Statistics
 {
-    public class StatisticsCollection : ReadOnlyCollection<IStatisticsCollector>, IStatisticsCollection
+    public class StatisticsCollection : IEnumerable<IStatisticsCollector>
     {
-        public StatisticsCollection(IList<IStatisticsCollector> list)
-            : base(list)
-        {
-        }
+        public TotalHits Hits { get; } = new TotalHits();
+        public StatusCodes StatusCodes { get; } = new StatusCodes();
+        public UrlSections UrlSections { get; } = new UrlSections();
 
         public bool Process(ILogEntry logEntry)
         {
@@ -22,6 +21,18 @@ namespace Sawmill.Components.Statistics
             }
 
             return isProcessed;
+        }
+
+        public IEnumerator<IStatisticsCollector> GetEnumerator()
+        {
+            yield return this.Hits;
+            yield return this.StatusCodes;
+            yield return this.UrlSections;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
     }
 }
