@@ -1,4 +1,5 @@
-﻿using Sawmill.Components.Alerts.Abstractions;
+﻿using Sawmill.Common.Console;
+using Sawmill.Components.Alerts.Abstractions;
 using System;
 
 namespace Sawmill.Components.Alerts
@@ -7,28 +8,33 @@ namespace Sawmill.Components.Alerts
     {
         public void RaiseAlert(DateTime timeStamp, int hitCount)
         {
-            if (Console.CursorLeft != 0)
-            {
-                Console.WriteLine();
-            }
+            var message = $"High traffic generated an alert - hits = {hitCount}, triggered at {this.Format(timeStamp)}";
 
-            var color = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"High traffic generated an alert - hits = {hitCount}, triggered at {timeStamp.ToLocalTime().ToLongTimeString()}");
-            Console.ForegroundColor = color;
+            this.NewLine();
+            this.Print(ConsoleColor.Red, message);
         }
 
         public void RecoverFromAlert(DateTime timeStamp, int hitCount)
         {
-            if (Console.CursorLeft != 0)
-            {
-                Console.WriteLine();
-            }
+            var message = $"Recovered from the altert - hits = {hitCount}, triggered at {this.Format(timeStamp)}";
 
-            var color = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Recovered from the altert - hits = {hitCount}, triggered at {timeStamp.ToLocalTime().ToLongTimeString()}");
-            Console.ForegroundColor = color;
+            this.NewLine();
+            this.Print(ConsoleColor.Green, message);
+        }
+
+        private string Format(DateTime value)
+        {
+            return value.ToLocalTime().ToLongTimeString();
+        }
+
+        private void Print(ConsoleColor color, string value)
+        {
+            ConsoleEx.ColorWrite(color, value);
+        }
+
+        private void NewLine()
+        {
+            ConsoleEx.NewLine();
         }
     }
 }

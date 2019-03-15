@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using Sawmill.Common.Console;
 using Sawmill.Components.Statistics.Abstractions;
 using Sawmill.Components.Statistics.Collectors;
 using System;
@@ -107,30 +108,24 @@ namespace Sawmill.Components.Statistics
             this.Print(": ");
         }
 
-        private void Print(string value)
-        {
-            Console.Write(value);
-        }
-
         private void PrintSeparator()
         {
             this.Print(", ");
         }
 
+        private void Print(string value)
+        {
+            ConsoleEx.Write(value);
+        }
+
         private void Print(ConsoleColor color, string value)
         {
-            var previousColor = Console.ForegroundColor;
-            Console.ForegroundColor = color;
-            this.Print(value);
-            Console.ForegroundColor = previousColor;
+            ConsoleEx.ColorWrite(color, value);
         }
 
         private void NewLine()
         {
-            if (Console.CursorLeft != 0)
-            {
-                Console.WriteLine();
-            }
+            ConsoleEx.NewLine();
         }
     }
 }
