@@ -63,7 +63,7 @@ namespace Sawmill.Components.Providers
 
         public ILogEntry GetEntry()
         {
-            var line = this.TryReadLine();
+            var line = this.Reader.ReadLine();
             if (line == null)
             {
                 return null;
@@ -72,23 +72,6 @@ namespace Sawmill.Components.Providers
             return this.Serializer.TryParse(line, out LogEntry logEntry)
                 ? logEntry 
                 : null;
-        }
-
-        private string TryReadLine()
-        {
-            try
-            {
-                return this.Reader.ReadLine();
-            }
-            catch(InvalidDataException e)
-            {
-                var color = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(e.Message);
-                Console.ForegroundColor = color;
-
-                return null;
-            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Sawmill.Application.Abstractions;
+using Sawmill.Common.Console;
 using Sawmill.Common.DateAndTime.Extensions;
 using Sawmill.Components.Alerts.Abstractions;
 using Sawmill.Components.Providers.Abstractions;
@@ -83,12 +84,12 @@ namespace Sawmill.Application
                 try
                 {
                     this.LogEntryProvider.Open();
-                    Console.WriteLine($"Reading from \"{this.LogEntryProvider.Path}\"");
+                    ConsoleEx.WriteNewLine($"Reading from \"{this.LogEntryProvider.Path}\"");
                     return;
                 }
                 catch(IOException e) when (e is FileNotFoundException || e is DirectoryNotFoundException || e is DriveNotFoundException)
                 {
-                    Console.WriteLine(e.Message);
+                    ConsoleEx.WriteNewLine(e.Message);
                     Thread.Sleep(this.OpenProviderDelay);
                 }
             }
@@ -112,13 +113,26 @@ namespace Sawmill.Application
         {
             for (var i = 0; i < this.BatchSize; i++)
             {
-                var logEntry = this.LogEntryProvider.GetEntry();
+                var logEntry = this.TryFetch();
                 if(logEntry == null)
                 {
                     break;                    
                 }
 
                 yield return logEntry;
+            }
+        }
+
+        private ILogEntry TryFetch()
+        {
+            try
+            {
+                return this.LogEntryProvider.GetEntry();
+            }
+            catch(Exception e)
+            {
+                ConsoleEx.ColorWriteNewLine(ConsoleColor.Yellow, e.Message);
+                return null;
             }
         }
 

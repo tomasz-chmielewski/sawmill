@@ -92,8 +92,6 @@ namespace Sawmill.Components.Alerts
 
                     this.CheckForAlert(this.MonitoredPeriodUtc.End);
                 }
-
-                //Console.WriteLine($"Alert hits: {this.MonitoredPeriodHitCount} ({string.Join(", ", this.HistoricalHitCount.OrderByDescending(x => x.Key).Select(x => x.Value))})");
             }
             else if(newStartUtc < this.MonitoredPeriodUtc.Start)
             {
