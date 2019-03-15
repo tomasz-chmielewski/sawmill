@@ -3,6 +3,6 @@
     public class LogEntryProviderOptions
     {
         public string Path { get; set; }
-        public int MaxLineLength { get; set; } = 90;
+        public int MaxLineLength { get; set; } = 10024;
     }
 }
