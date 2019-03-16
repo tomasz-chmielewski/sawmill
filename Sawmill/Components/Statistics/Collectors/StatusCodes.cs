@@ -8,9 +8,9 @@ namespace Sawmill.Components.Statistics.Collectors
         private readonly int[] hits = new int[4];
 
         public int Hits2xx => this.hits[0];
-        public int Hits3xx => this.hits[0];
-        public int Hits4xx => this.hits[0];
-        public int Hits5xx => this.hits[0];
+        public int Hits3xx => this.hits[1];
+        public int Hits4xx => this.hits[2];
+        public int Hits5xx => this.hits[3];
 
         public bool Process(ILogEntry logEntry)
         {
