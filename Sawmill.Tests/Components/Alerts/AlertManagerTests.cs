@@ -46,12 +46,14 @@ namespace Sawmill.Tests.Components.Alerts
                 alertHandler.Verify(x => x.RaiseAlert(It.IsAny<DateTime>(), It.IsAny<int>()), Times.Never());
 
                 // -> [n, n, n, n, n | requestsCount]
-                alertManager.Process(utcNow, this.CreateLogs(requestsCount, utcNow));
+                alertManager.Process(this.CreateLogs(requestsCount, utcNow));
+                alertManager.MoveMonitoredPeriod(utcNow);
                 utcNow.IncreaseBySeconds(1);
             }
 
             // -> [n, n, n, n, n | 0]
-            alertManager.Process(utcNow, this.CreateLogs(0, utcNow));
+            alertManager.Process(this.CreateLogs(0, utcNow));
+            alertManager.MoveMonitoredPeriod(utcNow);
             alertHandler.Verify(x => x.RaiseAlert(utcNow.FloorSeconds(1), expectedHitCount), Times.Once());
         }
 
@@ -77,12 +79,14 @@ namespace Sawmill.Tests.Components.Alerts
             foreach (var requestsCount in inflow)
             {
                 // -> [n, n, n, n, n | requestsCount]
-                alertManager.Process(utcNow, this.CreateLogs(requestsCount, utcNow));
+                alertManager.Process(this.CreateLogs(requestsCount, utcNow));
+                alertManager.MoveMonitoredPeriod(utcNow);
                 utcNow.IncreaseBySeconds(1);
             }
 
             // -> [n, n, n, n, n | 0]
-            alertManager.Process(utcNow, this.CreateLogs(0, utcNow));
+            alertManager.Process(this.CreateLogs(0, utcNow));
+            alertManager.MoveMonitoredPeriod(utcNow);
 
             var expectedAlertReportTime = utcNow.FloorSeconds(1) - TimeSpanEx.FromSecondsInt(delaySeconds);
             alertHandler.Verify(x => x.RaiseAlert(It.IsAny<DateTime>(), It.IsAny<int>()), Times.Once());
@@ -113,12 +117,14 @@ namespace Sawmill.Tests.Components.Alerts
                 alertHandler.Verify(x => x.RaiseAlert(It.IsAny<DateTime>(), It.IsAny<int>()), Times.Never());
 
                 // -> [n, n, n, n, n | requestsCount]
-                alertManager.Process(utcNow, this.CreateLogs(requestsCount, utcNow));
+                alertManager.Process(this.CreateLogs(requestsCount, utcNow));
+                alertManager.MoveMonitoredPeriod(utcNow);
                 utcNow.IncreaseBySeconds(1);
             }
 
             // -> [n, n, n, n, n | 0]
-            alertManager.Process(utcNow, this.CreateLogs(0, utcNow));
+            alertManager.Process(this.CreateLogs(0, utcNow));
+            alertManager.MoveMonitoredPeriod(utcNow);
             alertHandler.Verify(x => x.RaiseAlert(It.IsAny<DateTime>(), It.IsAny<int>()), Times.Never());
         }
 
@@ -149,12 +155,14 @@ namespace Sawmill.Tests.Components.Alerts
                 alertHandler.Verify(x => x.RecoverFromAlert(It.IsAny<DateTime>(), It.IsAny<int>()), Times.Never());
 
                 // -> [n, n, n, n, n | requestsCount]
-                alertManager.Process(utcNow, this.CreateLogs(requestsCount, utcNow));
+                alertManager.Process(this.CreateLogs(requestsCount, utcNow));
+                alertManager.MoveMonitoredPeriod(utcNow);
                 utcNow.IncreaseBySeconds(1);
             }
 
             // -> [n, n, n, n, n | 0]
-            alertManager.Process(utcNow, this.CreateLogs(0, utcNow));
+            alertManager.Process(this.CreateLogs(0, utcNow));
+            alertManager.MoveMonitoredPeriod(utcNow);
             alertHandler.Verify(x => x.RecoverFromAlert(utcNow.FloorSeconds(1), expectedHitCount), Times.Once());
         }
 
@@ -168,7 +176,7 @@ namespace Sawmill.Tests.Components.Alerts
             var alertManager = new AlertManager(options, alertHandler.Object);
 
             alertManager.Initialize(utcNow);
-            var processedRequests = alertManager.Process(utcNow, this.CreateLogs(5, utcNow.AddSecondsInt(-1)));
+            var processedRequests = alertManager.Process(this.CreateLogs(5, utcNow.AddSecondsInt(-1)));
 
             Assert.AreEqual(0, processedRequests);
         }
@@ -183,9 +191,10 @@ namespace Sawmill.Tests.Components.Alerts
             var alertManager = new AlertManager(options, alertHandler.Object);
 
             alertManager.Initialize(utcNow);
-            alertManager.Process(utcNow, this.CreateLogs(5, utcNow));
+            alertManager.Process(this.CreateLogs(5, utcNow));
+            alertManager.MoveMonitoredPeriod(utcNow);
 
-            Assert.Throws<InvalidOperationException>(() => alertManager.Process(utcNow.AddSecondsInt(-1), this.CreateLogs(5, utcNow)));
+            Assert.Throws<InvalidOperationException>(() => alertManager.MoveMonitoredPeriod(utcNow.AddSecondsInt(-1)));
         }
 
         private IOptions<AlertManagerOptions> CreateOptions(int monitoredPeriodSeconds, int delaySeconds, int hitsPerSecondsThreshold)

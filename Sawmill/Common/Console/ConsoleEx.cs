@@ -17,7 +17,18 @@ namespace Sawmill.Common.Console
             System.Console.Write(value);
         }
 
-        public static void WriteNewLine(string value)
+        public static void WriteLine(string value)
+        {
+            System.Console.WriteLine(value);
+        }
+
+        public static void NewLineWrite(string value)
+        {
+            NewLine();
+            System.Console.Write(value);
+        }
+
+        public static void NewLineWriteLine(string value)
         {
             NewLine();
             System.Console.WriteLine(value);
@@ -31,14 +42,24 @@ namespace Sawmill.Common.Console
             System.Console.ForegroundColor = previousColor;
         }
 
-        public static void ColorWriteNewLine(ConsoleColor color, string value)
+        public static void ColorWriteLine(ConsoleColor color, string value)
         {
-            NewLine();
-
             var previousColor = System.Console.ForegroundColor;
             System.Console.ForegroundColor = color;
             System.Console.WriteLine(value);
             System.Console.ForegroundColor = previousColor;
+        }
+
+        public static void NewLineColorWrite(ConsoleColor color, string value)
+        {
+            NewLine();
+            ColorWrite(color, value);
+        }
+
+        public static void NewLineColorWriteLine(ConsoleColor color, string value)
+        {
+            NewLine();
+            ColorWriteLine(color, value);
         }
     }
 }

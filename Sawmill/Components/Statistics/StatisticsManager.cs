@@ -37,7 +37,7 @@ namespace Sawmill.Components.Statistics
             this.GlobalStatisticsStartUtc = this.MonitoredPeriodUtc.Start;
         }
 
-        public int Process(DateTime utcNow, IEnumerable<ILogEntry> logEntries)
+        public int Process(IEnumerable<ILogEntry> logEntries)
         {
             var processedRequests = 0;
 
@@ -63,12 +63,10 @@ namespace Sawmill.Components.Statistics
                 }
             }
 
-            this.UpdateMonitoredPeriod(utcNow);
-
             return processedRequests;
         }
 
-        private void UpdateMonitoredPeriod(DateTime utcNow)
+        public void MoveMonitoredPeriod(DateTime utcNow)
         {
             if (utcNow >= this.ReportTimeUtc)
             {

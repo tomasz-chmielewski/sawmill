@@ -37,7 +37,7 @@ namespace Sawmill.Components.Alerts
             this.MonitoredPeriodUtc.Start = this.GetMonitoredPeriodStartUtc(utcNow);
         }
 
-        public int Process(DateTime utcNow, IEnumerable<ILogEntry> logEntries)
+        public int Process(IEnumerable<ILogEntry> logEntries)
         {
             var processedRequests = 0;
 
@@ -59,12 +59,10 @@ namespace Sawmill.Components.Alerts
                 }
             }
 
-            this.MoveMonitoredPeriod(utcNow);
-
             return processedRequests;
         }
 
-        private void MoveMonitoredPeriod(DateTime utcNow)
+        public void MoveMonitoredPeriod(DateTime utcNow)
         {
             var newStartUtc = this.GetMonitoredPeriodStartUtc(utcNow);
 

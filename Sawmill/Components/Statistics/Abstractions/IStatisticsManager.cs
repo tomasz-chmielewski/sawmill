@@ -7,6 +7,7 @@ namespace Sawmill.Components.Statistics.Abstractions
     public interface IStatisticsManager
     {
         void Initialize(DateTime utcNow);
-        int Process(DateTime utcNow, IEnumerable<ILogEntry> logEntries);
+        int Process(IEnumerable<ILogEntry> logEntries);
+        void MoveMonitoredPeriod(DateTime utcNow);
     }
 }

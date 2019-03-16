@@ -56,7 +56,7 @@ namespace LogGenerator
                             writer.WriteLine(logEntry);
                             //writer.Flush();
 
-                            Thread.Sleep(DelayMilliseconds);
+                            //Thread.Sleep(DelayMilliseconds);
                         }
                     }
                 }
@@ -71,15 +71,33 @@ namespace LogGenerator
 
         private static string GenerateLogEntry()
         {
+            var random = Random.Next(100000);
+            var isInvalidLine = random == 0;
+            var isLineTooLong = random == 1;
+            var isOutdatedLog = false;// random == 2;
+
+            if (isInvalidLine)
+            {
+                return "127.0.0.1 - frank [15/MarMar/2019:21:44:36 +0100] \"GET / api / user / 12 / posts ? q = abc HTTP / 1.0\" 411 48";
+            }
+
+            if(isLineTooLong)
+            {
+                return new string('x', 20000);
+            }
+
             var endpoint = ValidEndpoints[Random.Next(ValidEndpoints.Length)];
+
+            var timeStamp = !isOutdatedLog ? DateTime.Now : (DateTime.Now - new TimeSpan(0, 0, 2));
 
             var clientAddress = "127.0.0.1";
             var userId = "-";
             var userName = "frank";
-            var dateTime = DateTime.Now.ToString("dd/MMM/yyyy:HH:mm:ss zzz", CultureInfo.InvariantCulture);
+            var dateTime = timeStamp.ToString("dd/MMM/yyyy:HH:mm:ss zzz", CultureInfo.InvariantCulture);
             var request = $"GET {endpoint} HTTP/1.0";
             var status = Random.Next(200, 599);
             var objectSize = 48;
+
 
             var colonIndex = dateTime.LastIndexOf(':');
             dateTime = dateTime.Substring(0, colonIndex) + dateTime.Substring(colonIndex + 1);

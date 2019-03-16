@@ -8,7 +8,6 @@ using Sawmill.Data.Models.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 
 namespace Sawmill.Application
@@ -25,7 +24,7 @@ namespace Sawmill.Application
             this.LogEntryProvider = logEntryProvider ?? throw new ArgumentNullException(nameof(logEntryProvider));
         }
 
-        private TimeSpan OpenProviderDelay { get; } = TimeSpanEx.FromMillisecondsInt(1000);
+        private TimeSpan TryOpenProviderDelay { get; } = TimeSpanEx.FromMillisecondsInt(1000);
         private TimeSpan FetchInterval { get; } = TimeSpanEx.FromMillisecondsInt(500);
         private int BatchSize { get; } = 100;
 
@@ -49,11 +48,11 @@ namespace Sawmill.Application
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    // TODO: Process line by line and call UpdateMonitoredPeriod() when there is no data
-                    var logEntries = this.Fetch().ToList();
+                    var logEntries = this.Fetch();
 
                     var utcNow = DateTime.UtcNow;
-                    this.Process(utcNow, logEntries);
+                    this.Process(logEntries);
+                    this.MoveMonitoredPeriod(utcNow);
 
                     if (logEntries.Count == 0)
                     {
@@ -84,21 +83,19 @@ namespace Sawmill.Application
                 try
                 {
                     this.LogEntryProvider.Open();
-                    ConsoleEx.WriteNewLine($"Reading from \"{this.LogEntryProvider.Path}\"");
+                    ConsoleEx.NewLineWriteLine($"Reading from \"{this.LogEntryProvider.Path}\"");
                     return;
                 }
                 catch(IOException e) when (e is FileNotFoundException || e is DirectoryNotFoundException || e is DriveNotFoundException)
                 {
-                    ConsoleEx.WriteNewLine(e.Message);
-                    Thread.Sleep(this.OpenProviderDelay);
+                    ConsoleEx.NewLineWriteLine(e.Message);
+                    Thread.Sleep(this.TryOpenProviderDelay);
                 }
             }
         }
 
         private void WaitForData()
         {
-            // TODO: use FileSystemWatcher class instead of Thread.Sleep()
-
             var utcNow = DateTime.UtcNow;
             var nextFetchTime = utcNow.Ceiling(this.FetchInterval);
             var millisecondsToWait = (nextFetchTime - utcNow).TotalMillisecondsAsInt() + 1;
@@ -109,37 +106,49 @@ namespace Sawmill.Application
             }
         }
 
-        private IEnumerable<ILogEntry> Fetch()
+        private IReadOnlyCollection<ILogEntry> Fetch()
         {
+            var entries = new List<ILogEntry>(this.BatchSize);
+
             for (var i = 0; i < this.BatchSize; i++)
             {
-                var logEntry = this.TryFetch();
-                if(logEntry == null)
+                var logEntry = this.LogEntryProvider.GetEntry();
+                if (logEntry == null)
                 {
                     break;                    
                 }
 
-                yield return logEntry;
+                entries.Add(logEntry);
+            }
+
+            return entries;
+        }
+
+        private void Process(IReadOnlyCollection<ILogEntry> logEntries)
+        {
+            var processedLogs = this.StatisticsManager.Process(logEntries);
+            if(processedLogs != logEntries.Count)
+            {
+                this.HandleWarning($"Statistics manager has rejected {logEntries.Count - processedLogs} logs");
+            }
+
+            processedLogs = this.AlertManager.Process(logEntries);
+            if (processedLogs != logEntries.Count)
+            {
+                this.HandleWarning($"Alert manager has rejected {logEntries.Count - processedLogs} logs");
             }
         }
 
-        private ILogEntry TryFetch()
+        private void MoveMonitoredPeriod(DateTime utcNow)
         {
-            try
-            {
-                return this.LogEntryProvider.GetEntry();
-            }
-            catch(Exception e)
-            {
-                ConsoleEx.ColorWriteNewLine(ConsoleColor.Yellow, e.Message);
-                return null;
-            }
+            this.StatisticsManager.MoveMonitoredPeriod(utcNow);
+            this.AlertManager.MoveMonitoredPeriod(utcNow);
         }
 
-        private void Process(DateTime utcNow, IEnumerable<ILogEntry> logEntries)
+        private void HandleWarning(string message)
         {
-            this.StatisticsManager.Process(utcNow, logEntries);
-            this.AlertManager.Process(utcNow, logEntries);
+            ConsoleEx.NewLineColorWrite(ConsoleColor.Yellow, "Warning: ");
+            ConsoleEx.WriteLine(message);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using Sawmill.Common.Console;
 using Sawmill.Common.IO;
 using Sawmill.Components.Providers.Abstractions;
 using Sawmill.Data;
@@ -63,15 +64,37 @@ namespace Sawmill.Components.Providers
 
         public ILogEntry GetEntry()
         {
-            var line = this.Reader.ReadLine();
-            if (line == null)
+            while (true)
             {
-                return null;
-            }
+                string line;
+                try
+                {
+                    line = this.Reader.ReadLine();
+                    if (line == null)
+                    {
+                        return null;
+                    }
+                }
+                catch (InvalidDataException e)
+                {
+                    this.HandleWarning(e.Message);
+                    continue;
+                }
 
-            return this.Serializer.TryParse(line, out LogEntry logEntry)
-                ? logEntry 
-                : null;
+                if(!this.Serializer.TryParse(line, out LogEntry logEntry))
+                {
+                    this.HandleWarning("Persing error");
+                    continue;
+                }
+
+                return logEntry;
+            }
+        }
+
+        private void HandleWarning(string message)
+        {
+            ConsoleEx.NewLineColorWrite(ConsoleColor.Yellow, "Warning: ");
+            ConsoleEx.WriteLine(message);
         }
     }
 }
