@@ -18,6 +18,10 @@ namespace Sawmill.Components.Statistics.Collectors
         public bool Process(ILogEntry logEntry)
         {
             var path = this.GetSectionPath(logEntry);
+            if(path == null)
+            {
+                return false;
+            }
 
             if(this.Sections.TryGetValue(path, out var section))
             {
@@ -78,10 +82,34 @@ namespace Sawmill.Components.Statistics.Collectors
         {
             var uri = logEntry.Request.Uri.ToString().AsSpan();
 
-            var firstSlash = uri.IndexOf('/');
-            var secondSlash = firstSlash != -1 && firstSlash + 1 < uri.Length ? uri.Slice(firstSlash + 1).IndexOfAny('/', '?') : -1;
+            var firstSlash = this.IndexOfRelativePath(uri);
+            if(firstSlash < 0)
+            {
+                return null;
+            }
 
-            return (secondSlash != -1 ? uri.Slice(0, firstSlash + secondSlash + 1) : uri).ToString();
+            uri = uri.Slice(firstSlash);
+            var secondSlash = uri.Length > 0 ? uri.Slice(1).IndexOfAny('/', '?') : -1;
+
+            return (secondSlash != -1 ? uri.Slice(0, secondSlash + 1) : uri).ToString();
+        }
+
+        private int IndexOfRelativePath(ReadOnlySpan<char> uri)
+        {
+            var slashIndex = uri.IndexOf('/');
+
+            // is it absolute uri ? "http://xxxxxx.xxx/section/..."
+            if(slashIndex > 0 && uri[slashIndex - 1] == ':')
+            {
+                if(slashIndex + 2 >= uri.Length || uri[slashIndex + 1] != '/')
+                {
+                    return -1;
+                }
+
+                slashIndex += 2 + uri.Slice(slashIndex + 2).IndexOf('/');
+            }
+
+            return slashIndex;
         }
 
         private class UrlSection : IUrlSection
