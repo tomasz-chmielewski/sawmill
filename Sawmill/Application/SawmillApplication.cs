@@ -25,8 +25,8 @@ namespace Sawmill.Application
         }
 
         private TimeSpan TryOpenProviderDelay { get; } = TimeSpanEx.FromMillisecondsInt(1000);
-        private TimeSpan FetchInterval { get; } = TimeSpanEx.FromMillisecondsInt(500);
-        private int BatchSize { get; } = 100;
+        private TimeSpan FetchInterval { get; } = TimeSpanEx.FromMillisecondsInt(100);
+        private int BatchSize { get; } = 1000;
 
         private ILogEntryProvider LogEntryProvider { get; }
         private IStatisticsManager StatisticsManager { get; }
@@ -108,7 +108,7 @@ namespace Sawmill.Application
 
         private IReadOnlyCollection<ILogEntry> Fetch()
         {
-            var entries = new List<ILogEntry>(this.BatchSize);
+            var entries = new List<ILogEntry>();
 
             for (var i = 0; i < this.BatchSize; i++)
             {
@@ -118,6 +118,10 @@ namespace Sawmill.Application
                     break;                    
                 }
 
+                if(entries.Capacity == 0)
+                {
+                    entries.Capacity = this.BatchSize;
+                }
                 entries.Add(logEntry);
             }
 

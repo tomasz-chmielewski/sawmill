@@ -74,7 +74,7 @@ namespace LogGenerator
             var random = Random.Next(100000);
             var isInvalidLine = random == 0;
             var isLineTooLong = random == 1;
-            var isOutdatedLog = false;// random == 2;
+            var isOutdatedLog = random == 2;
 
             if (isInvalidLine)
             {
@@ -88,7 +88,7 @@ namespace LogGenerator
 
             var endpoint = ValidEndpoints[Random.Next(ValidEndpoints.Length)];
 
-            var timeStamp = !isOutdatedLog ? DateTime.Now : (DateTime.Now - new TimeSpan(0, 0, 2));
+            var timeStamp = !isOutdatedLog ? DateTime.Now : (DateTime.Now - new TimeSpan(0, 0, 10));
 
             var clientAddress = "127.0.0.1";
             var userId = "-";
