@@ -79,7 +79,7 @@ namespace Sawmill.Components.Statistics.Collectors
             var uri = logEntry.Request.Uri.ToString().AsSpan();
 
             var firstSlash = uri.IndexOf('/');
-            var secondSlash = firstSlash != -1 && firstSlash + 1 < uri.Length ? uri.Slice(firstSlash + 1).IndexOf('/') : -1;
+            var secondSlash = firstSlash != -1 && firstSlash + 1 < uri.Length ? uri.Slice(firstSlash + 1).IndexOfAny('/', '?') : -1;
 
             return (secondSlash != -1 ? uri.Slice(0, firstSlash + secondSlash + 1) : uri).ToString();
         }
