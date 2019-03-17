@@ -83,12 +83,12 @@ namespace Sawmill.Application
                 try
                 {
                     this.LogEntryProvider.Open();
-                    ConsoleEx.NewLineWriteLine($"Reading from \"{this.LogEntryProvider.Path}\"");
+                    ConsoleEx.WriteLine($"Reading from \"{this.LogEntryProvider.Path}\"");
                     return;
                 }
                 catch(IOException e) when (e is FileNotFoundException || e is DirectoryNotFoundException || e is DriveNotFoundException)
                 {
-                    ConsoleEx.NewLineWriteLine(e.Message);
+                    ConsoleEx.WriteLine(e.Message);
                     Thread.Sleep(this.TryOpenProviderDelay);
                 }
             }
@@ -151,7 +151,7 @@ namespace Sawmill.Application
 
         private void HandleWarning(string message)
         {
-            ConsoleEx.NewLineColorWrite(ConsoleColor.Yellow, "Warning: ");
+            ConsoleEx.ColorWrite(ConsoleColor.Yellow, "Warning: ");
             ConsoleEx.WriteLine(message);
         }
     }

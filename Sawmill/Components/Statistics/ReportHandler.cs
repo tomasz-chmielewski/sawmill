@@ -30,7 +30,6 @@ namespace Sawmill.Components.Statistics
         {
             var statistics = report.Statistics;
 
-            this.NewLine();
             this.PrintHeader(report.PeriodStart, report.PeriodEnd);
 
             this.PrintTotalHits(statistics.Hits);
@@ -125,7 +124,7 @@ namespace Sawmill.Components.Statistics
 
         private void NewLine()
         {
-            ConsoleEx.NewLine();
+            ConsoleEx.WriteLine();
         }
     }
 }

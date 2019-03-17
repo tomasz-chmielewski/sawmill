@@ -10,7 +10,6 @@ namespace Sawmill.Components.Alerts
         {
             var message = $"High traffic generated an alert - hits = {hitCount}, triggered at {this.Format(timeStamp)}";
 
-            this.NewLine();
             this.Print(ConsoleColor.Red, message);
         }
 
@@ -18,7 +17,6 @@ namespace Sawmill.Components.Alerts
         {
             var message = $"Recovered from the altert - hits = {hitCount}, triggered at {this.Format(timeStamp)}";
 
-            this.NewLine();
             this.Print(ConsoleColor.Green, message);
         }
 
@@ -29,12 +27,7 @@ namespace Sawmill.Components.Alerts
 
         private void Print(ConsoleColor color, string value)
         {
-            ConsoleEx.ColorWrite(color, value);
-        }
-
-        private void NewLine()
-        {
-            ConsoleEx.NewLine();
+            ConsoleEx.ColorWriteLine(color, value);
         }
     }
 }

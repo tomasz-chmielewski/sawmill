@@ -9,6 +9,8 @@ namespace LogGenerator
     public class Program
     {
         private const string LogPath = @"C:\tmp\access.log";
+        private const string SourcePath = @"C:\Users\tom_c\Downloads\access.log";
+
         private const int DelayMilliseconds = 1;
 
         private static readonly Random Random = new Random();
@@ -40,23 +42,30 @@ namespace LogGenerator
 
                 try
                 {
+                    //using (var sourceStream = File.Open(SourcePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     using (var sinkStream = File.Open(LogPath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read))
                     using (var writer = new StreamWriter(sinkStream, Encoding.ASCII))
                     {
                         sinkStream.Seek(0, SeekOrigin.End);
 
+                        //Console.WriteLine($"Reading from \"{sourceStream.Name}\"");
                         Console.WriteLine($"Writing to \"{sinkStream.Name}\"");
+
+                        //var buffer = new byte[1024];
 
                         while (true)
                         {
                             Console.Write(".");
                             cts.Token.ThrowIfCancellationRequested();
 
+                            //var bytesRead = sourceStream.Read(buffer);
+                            //sinkStream.Write(buffer, 0, bytesRead);
+
                             var logEntry = GenerateLogEntry();
                             writer.WriteLine(logEntry);
-                            //writer.Flush();
+                            writer.Flush();
 
-                            //Thread.Sleep(DelayMilliseconds);
+                            Thread.Sleep(DelayMilliseconds);
                         }
                     }
                 }

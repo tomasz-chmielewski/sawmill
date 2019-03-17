@@ -93,7 +93,7 @@ namespace Sawmill.Components.Providers
 
         private void HandleWarning(string message)
         {
-            ConsoleEx.NewLineColorWrite(ConsoleColor.Yellow, "Warning: ");
+            ConsoleEx.ColorWrite(ConsoleColor.Yellow, "Warning: ");
             ConsoleEx.WriteLine(message);
         }
     }
