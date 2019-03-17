@@ -102,11 +102,6 @@ namespace Sawmill.Components.Alerts
             return utcNow.FloorSeconds(1) - this.MonitoredPeriodUtc.Duration - this.Delay;
         }
 
-        private bool IsWithinMonitoredPeriod(DateTime utc)
-        {
-            return utc >= this.MonitoredPeriodUtc.Start && utc < this.MonitoredPeriodUtc.End;
-        }
-
         private void CheckForAlert(DateTime timeStamp)
         {
             if (!this.HasAlert && this.MonitoredPeriodHitCount > this.HitCountThreshold)

@@ -15,8 +15,8 @@ namespace Sawmill.Application
     public sealed class SawmillApplication : ISawmillApplication
     {
         public SawmillApplication(
-            ILogEntryProvider logEntryProvider, 
-            IAlertManager alertManager, 
+            ILogEntryProvider logEntryProvider,
+            IAlertManager alertManager,
             IStatisticsManager statistiscManager)
         {
             this.StatisticsManager = statistiscManager ?? throw new ArgumentNullException(nameof(statistiscManager));
@@ -115,7 +115,7 @@ namespace Sawmill.Application
                 var logEntry = this.LogEntryProvider.GetEntry();
                 if (logEntry == null)
                 {
-                    break;                    
+                    break;
                 }
 
                 if(entries.Capacity == 0)

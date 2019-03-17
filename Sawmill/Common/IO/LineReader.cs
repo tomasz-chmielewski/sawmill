@@ -7,8 +7,8 @@ namespace Sawmill.Common.IO
     {
         public LineReader(Stream stream, int maxLineLength) : base(stream)
         {
-            this.MaxLineLength = maxLineLength > 0 
-                ? maxLineLength 
+            this.MaxLineLength = maxLineLength > 0
+                ? maxLineLength
                 : throw new ArgumentException($"{nameof(maxLineLength)} must be greater then zero.", nameof(maxLineLength));
 
             this.Buffer = new char[maxLineLength + 1];

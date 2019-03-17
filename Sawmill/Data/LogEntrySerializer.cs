@@ -24,11 +24,11 @@ namespace Sawmill.Data
             var userId = ParseName(userIdPart);
             var userName = ParseName(userIdPart);
 
-            if (!IPAddress.TryParse(clientAddressPart, out IPAddress clientAddress) ||
-                !TryParseTimeStamp(timeStampPart, out DateTime timeStampUtc) ||
-                !TryParseInt(statusPart, out int status) ||
-                !TryParseNullableInt(objectSizePart, out int? objectSize) ||
-                !this.TryParse(requestPart, out LogEntryRequest request))
+            if (!IPAddress.TryParse(clientAddressPart, out IPAddress clientAddress)
+                || !TryParseTimeStamp(timeStampPart, out DateTime timeStampUtc)
+                || !TryParseInt(statusPart, out int status)
+                || !TryParseNullableInt(objectSizePart, out int? objectSize)
+                || !this.TryParse(requestPart, out LogEntryRequest request))
             {
                 result = null;
                 return false;

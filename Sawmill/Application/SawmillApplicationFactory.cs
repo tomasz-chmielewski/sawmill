@@ -49,7 +49,7 @@ namespace Sawmill.Application
 
         private void AddConfiguration(IServiceCollection services)
         {
-            var builder = 
+            var builder =
                 new ConfigurationBuilder()
                 .SetBasePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
                 .AddJsonFile("appsettings.json", true, false)

@@ -9,7 +9,7 @@ namespace Sawmill.Components.Statistics.Collectors
 {
     public class UrlSections : IStatisticsCollector, IEnumerable<IUrlSection>
     {
-        private Dictionary<string, UrlSection> Sections { get; } 
+        private Dictionary<string, UrlSection> Sections { get; }
             = new Dictionary<string, UrlSection>(StringComparer.Ordinal);
 
         private SortedDictionary<int, HashSet<UrlSection>> SectionIndex { get; }
