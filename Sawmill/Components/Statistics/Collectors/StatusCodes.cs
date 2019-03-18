@@ -8,27 +8,25 @@ namespace Sawmill.Components.Statistics.Collectors
     /// </summary>
     public class StatusCodes : IStatisticsCollector
     {
-        private readonly int[] hits = new int[4];
-
         /// <summary>
         /// Number of collected 2xx status codes.
         /// </summary>
-        public int Hits2xx => this.hits[0];
+        public int Hits2xx { get; private set; }
 
         /// <summary>
         /// Number of collected 3xx status codes.
         /// </summary>
-        public int Hits3xx => this.hits[1];
+        public int Hits3xx { get; private set; }
 
         /// <summary>
         /// Number of collected 4xx status codes.
         /// </summary>
-        public int Hits4xx => this.hits[2];
+        public int Hits4xx { get; private set; }
 
         /// <summary>
         /// Number of collected 4xx status codes.
         /// </summary>
-        public int Hits5xx => this.hits[3];
+        public int Hits5xx { get; private set; }
 
         /// <summary>
         /// Process the specified log entry.
@@ -37,14 +35,36 @@ namespace Sawmill.Components.Statistics.Collectors
         /// <returns>true if the entry was processed or false otherwise.</returns>
         public bool Process(ILogEntry logEntry)
         {
-            var index = (logEntry.Status - 200) / 100;
-            if(index < 0 || index >= this.hits.Length)
+            var statusCode = logEntry.Status;
+
+            if (statusCode < 200)
             {
                 return false;
             }
-
-            this.hits[index]++;
-            return true;
+            else if(statusCode < 300)
+            {
+                this.Hits2xx++;
+                return true;
+            }
+            else if(statusCode < 400)
+            {
+                this.Hits3xx++;
+                return true;
+            }
+            else if (statusCode < 500)
+            {
+                this.Hits4xx++;
+                return true;
+            }
+            else if (statusCode < 600)
+            {
+                this.Hits5xx++;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

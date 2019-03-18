@@ -25,8 +25,11 @@ namespace Sawmill.Data
             span = span.TrimAndSlice(' ', ' ', out var objectSizePart);
 
             var userId = this.ParseName(userIdPart);
-            var userName = this.ParseName(userIdPart);
+            var userName = this.ParseName(userNamePart);
 
+            // TODO: Use a different way to parse/validate ip address
+            // IPAddress.TryParse() accepts strings in non-standard forms
+            // https://docs.microsoft.com/pl-pl/dotnet/api/system.net.ipaddress.tryparse?view=netcore-2.2#System_Net_IPAddress_TryParse_System_String_System_Net_IPAddress__
             if (!IPAddress.TryParse(clientAddressPart, out var clientAddress)
                 || !this.TryParseTimeStamp(timeStampPart, out var timeStampUtc)
                 || !this.TryParseInt(statusPart, out var status)
@@ -57,7 +60,12 @@ namespace Sawmill.Data
             span = span.TrimAndSlice(' ', ' ', out var uriSpan);
             span = span.TrimAndSlice(' ', ' ', out var protocolSpan);
 
-            if (!Uri.TryCreate(uriSpan.ToString(), UriKind.RelativeOrAbsolute, out var uri))
+            var method = methodSpan.ToString();
+            var protocol = protocolSpan.ToString();
+
+            if (!Uri.TryCreate(uriSpan.ToString(), UriKind.RelativeOrAbsolute, out var uri)
+                || string.IsNullOrWhiteSpace(method)
+                || string.IsNullOrWhiteSpace(protocol))
             {
                 result = null;
                 return false;
@@ -65,9 +73,9 @@ namespace Sawmill.Data
 
             result = new LogEntryRequest
             {
-                Method = methodSpan.ToString(),
+                Method = method,
                 Uri = uri,
-                Protocol = protocolSpan.ToString()
+                Protocol = protocol
             };
 
             return true;

@@ -57,6 +57,7 @@ Both global and periodic statistics include:
 The first line presents the global statistics and the second line presents the periodic statistics from the last 10 seconds.
 <pre>[13:25:30-        ] hits: 2971, 2xx: 751, 3xx: 748, 4xx: 759, 5xx: 713, sections: [/api: 1632, /endpoint1: 283, /: 281, /users: 281, /data: 247]
 [13:26:10-13:26:20] hits: 436, 2xx: 127, 3xx: 108, 4xx: 110, 5xx: 91, sections: [/api: 242, /users: 49, /: 43, /endpoint1: 40, /endpoint2: 31]</pre>
+* all the presented timestamps are expressed in local time zone
 
 Data is collected for the `Statistics:MonitoredPeriodSeconds` seconds and displayed `Statistics:ReportDelaySeconds` seconds later. After the statistics are displayed all subsequent requests with the timestamp lesser then the end of the last presented period will be rejected. Application informs about that fact by displaying a suitable message.
 
@@ -78,3 +79,4 @@ At 10:20:32 the alert for the [10:20:20, 10:20:30) period will be displayed (if 
 #### Sample output
 <pre>High traffic generated an alert - hits = 1250, triggered at 13:25:56
 Recovered from the alert - hits = 1170, triggered at 13:28:02</pre>
+* all the presented timestamps are expressed in local time zone
