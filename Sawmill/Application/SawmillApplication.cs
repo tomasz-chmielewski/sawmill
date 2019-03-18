@@ -1,8 +1,10 @@
 ﻿using Sawmill.Application.Abstractions;
 using Sawmill.Common.Console;
 using Sawmill.Common.DateAndTime.Extensions;
+using Sawmill.Components.Alerts;
 using Sawmill.Components.Alerts.Abstractions;
 using Sawmill.Components.Providers.Abstractions;
+using Sawmill.Components.Statistics;
 using Sawmill.Components.Statistics.Abstractions;
 using Sawmill.Data.Models.Abstractions;
 using System;
@@ -133,13 +135,13 @@ namespace Sawmill.Application
             var processedLogs = this.StatisticsManager.Process(logEntries);
             if(processedLogs != logEntries.Count)
             {
-                this.HandleWarning($"Statistics manager has rejected {logEntries.Count - processedLogs} logs");
+                this.HandleWarning($"Statistics manager has rejected {logEntries.Count - processedLogs} logs. Try to increase {nameof(StatisticsOptions.ReportDelaySeconds)} to prevent it.");
             }
 
             processedLogs = this.AlertManager.Process(logEntries);
             if (processedLogs != logEntries.Count)
             {
-                this.HandleWarning($"Alert manager has rejected {logEntries.Count - processedLogs} logs");
+                this.HandleWarning($"Alert manager has rejected {logEntries.Count - processedLogs} logs. Try to increase {nameof(AlertManagerOptions.DelaySeconds)} to prevent it.");
             }
         }
 

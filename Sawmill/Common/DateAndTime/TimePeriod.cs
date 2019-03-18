@@ -2,6 +2,9 @@
 
 namespace Sawmill.Common.DateAndTime
 {
+    /// <summary>
+    /// Represents a period of time.
+    /// </summary>
     public class TimePeriod
     {
         public TimePeriod()
@@ -20,8 +23,19 @@ namespace Sawmill.Common.DateAndTime
             this.Duration = end - start;
         }
 
+        /// <summary>
+        /// Start of the period.
+        /// </summary>
         public DateTime Start { get; set; }
+
+        /// <summary>
+        /// Duration of the period.
+        /// </summary>
         public TimeSpan Duration { get; set; }
+
+        /// <summary>
+        /// End of the period.
+        /// </summary>
         public DateTime End => this.Start + this.Duration;
     }
 }

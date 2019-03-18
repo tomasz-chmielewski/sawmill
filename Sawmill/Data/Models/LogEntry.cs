@@ -4,6 +4,9 @@ using System.Net;
 
 namespace Sawmill.Data.Models
 {
+    /// <summary>
+    /// Represents a www server log entry.
+    /// </summary>
     public class LogEntry : ILogEntry
     {
         public IPAddress ClientAddress { get; set; }

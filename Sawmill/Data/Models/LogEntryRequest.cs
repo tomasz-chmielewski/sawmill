@@ -3,6 +3,9 @@ using System;
 
 namespace Sawmill.Data.Models
 {
+    /// <summary>
+    /// Represents the request part of a www server log entry.
+    /// </summary>
     public class LogEntryRequest : ILogEntryRequest
     {
         public string Method { get; set; }

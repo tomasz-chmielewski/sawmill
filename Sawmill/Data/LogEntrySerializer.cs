@@ -6,6 +6,9 @@ using System.Net;
 
 namespace Sawmill.Data
 {
+    /// <summary>
+    /// Deserialize instances of <see cref="LogEntry"/> class.
+    /// </summary>
     public class LogEntrySerializer
     {
         private const string TimeStampFormat = "dd/MMM/yyyy:HH:mm:ss zzz";

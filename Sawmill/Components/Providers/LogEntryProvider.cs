@@ -3,15 +3,21 @@ using Sawmill.Common.Console;
 using Sawmill.Common.IO;
 using Sawmill.Components.Providers.Abstractions;
 using Sawmill.Data;
-using Sawmill.Data.Models;
 using Sawmill.Data.Models.Abstractions;
 using System;
 using System.IO;
 
 namespace Sawmill.Components.Providers
 {
+    /// <summary>
+    /// Represents object that provides instances of <see cref="ILogEntry"/>.
+    /// </summary>
     public sealed class LogEntryProvider : ILogEntryProvider
     {
+        /// <summary>
+        /// Creates a new instance of <see cref="LogEntryProvider"/>.
+        /// </summary>
+        /// <param name="optionsAccessor">Object configuration accessor.</param>
         public LogEntryProvider(IOptions<LogEntryProviderOptions> optionsAccessor)
         {
             var options = optionsAccessor.Value;
@@ -19,6 +25,9 @@ namespace Sawmill.Components.Providers
             this.MaxLineLength = options.MaxLineLength;
         }
 
+        /// <summary>
+        /// Path of the input file.
+        /// </summary>
         public string Path { get; }
 
         private int MaxLineLength { get; }
@@ -26,11 +35,26 @@ namespace Sawmill.Components.Providers
         private LineReader Reader { get; set; }
         private LogEntrySerializer Serializer { get; } = new LogEntrySerializer();
 
+        /// <summary>
+        /// Releases all resources used by the object.
+        /// </summary>
         public void Dispose()
         {
             this.Close();
         }
 
+        /// <summary>
+        /// Opens a stream on the specified path.
+        /// </summary>
+        /// <exception cref="System.ArgumentException"></exception>
+        /// <exception cref="System.ArgumentNullException"></exception>
+        /// <exception cref="System.IO.PathTooLongException"></exception>
+        /// <exception cref="System.IO.DirectoryNotFoundException"></exception>
+        /// <exception cref="System.IO.IOException"></exception>
+        /// <exception cref="System.UnauthorizedAccessException"></exception>
+        /// <exception cref="System.IO.FileNotFoundException"></exception>
+        /// <exception cref="System.NotSupportedException"></exception>
+        /// <exception cref="System.ObjectDisposedException"></exception>
         public void Open()
         {
             if (this.Reader != null)
@@ -53,6 +77,9 @@ namespace Sawmill.Components.Providers
             }
         }
 
+        /// <summary>
+        /// Closes the current stream and releases any resources.
+        /// </summary>
         public void Close()
         {
             if (this.Reader != null)
@@ -62,6 +89,10 @@ namespace Sawmill.Components.Providers
             }
         }
 
+        /// <summary>
+        /// Returns the next available log entry.
+        /// </summary>
+        /// <returns>Next available log entry or null if there are no entries available at the time.</returns>
         public ILogEntry GetEntry()
         {
             while (true)
@@ -81,7 +112,7 @@ namespace Sawmill.Components.Providers
                     continue;
                 }
 
-                if(!this.Serializer.TryParse(line, out LogEntry logEntry))
+                if(!this.Serializer.TryParse(line, out var logEntry))
                 {
                     this.HandleWarning("Persing error");
                     continue;

@@ -3,6 +3,9 @@ using System.Net;
 
 namespace Sawmill.Data.Models.Abstractions
 {
+    /// <summary>
+    /// Represents a www server log entry.
+    /// </summary>
     public interface ILogEntry
     {
         IPAddress ClientAddress { get; }

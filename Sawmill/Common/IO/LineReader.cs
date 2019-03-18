@@ -3,8 +3,17 @@ using System.IO;
 
 namespace Sawmill.Common.IO
 {
+    /// <summary>
+    /// Represents a reader that can read a text stream line by line.
+    /// </summary>
     public class LineReader : StreamReader
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LineReader"/> class for the specified stream.
+        /// </summary>
+        /// <param name="stream">The stream to be read.</param>
+        /// <param name="maxLineLength">Maximum accepted line length in characters.</param>
+        /// <exception cref="System.ArgumentException"></exception>
         public LineReader(Stream stream, int maxLineLength) : base(stream)
         {
             this.MaxLineLength = maxLineLength > 0
@@ -21,6 +30,18 @@ namespace Sawmill.Common.IO
         private int LineStartPosition { get; set; }
         private bool AcceptLine { get; set; } = true;
 
+        /// <summary>
+        /// Reads a line of characters from the current stream and returns the data as a string.
+        /// </summary>
+        /// <remarks>
+        /// <para>The method ommits empty lines and lines that are longer then the <see cref="LineReader.MaxLineLength"/>.</para>
+        /// </remarks>
+        /// <returns>
+        /// The next line from the input stream (excluding empty lines and lines longer then <see cref="LineReader.MaxLineLength"/>), 
+        /// or null if the end of the input stream is reached.
+        /// </returns>
+        /// <exception cref="System.InvalidDataException">Line is longer then <see cref="MaxLineLength"/> characters.</exception>
+        /// <exception cref="System.IO.IOException">An I/O error occurs, such as the stream is closed.</exception>
         public override string ReadLine()
         {
             do
