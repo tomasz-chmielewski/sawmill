@@ -13,21 +13,21 @@ namespace Sawmill.Data
 
         public bool TryParse(ReadOnlySpan<char> span, out LogEntry result)
         {
-            span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> clientAddressPart);
-            span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> userIdPart);
-            span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> userNamePart);
-            span = span.Slice('[', ']', out ReadOnlySpan<char> timeStampPart);
-            span = span.Slice('\"', '\"', out ReadOnlySpan<char> requestPart);
-            span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> statusPart);
-            span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> objectSizePart);
+            span = span.TrimAndSlice(' ', ' ', out var clientAddressPart);
+            span = span.TrimAndSlice(' ', ' ', out var userIdPart);
+            span = span.TrimAndSlice(' ', ' ', out var userNamePart);
+            span = span.Slice('[', ']', out var timeStampPart);
+            span = span.Slice('\"', '\"', out var requestPart);
+            span = span.TrimAndSlice(' ', ' ', out var statusPart);
+            span = span.TrimAndSlice(' ', ' ', out var objectSizePart);
 
-            var userId = ParseName(userIdPart);
-            var userName = ParseName(userIdPart);
+            var userId = this.ParseName(userIdPart);
+            var userName = this.ParseName(userIdPart);
 
-            if (!IPAddress.TryParse(clientAddressPart, out IPAddress clientAddress)
-                || !TryParseTimeStamp(timeStampPart, out DateTime timeStampUtc)
-                || !TryParseInt(statusPart, out int status)
-                || !TryParseNullableInt(objectSizePart, out int? objectSize)
+            if (!IPAddress.TryParse(clientAddressPart, out var clientAddress)
+                || !this.TryParseTimeStamp(timeStampPart, out var timeStampUtc)
+                || !this.TryParseInt(statusPart, out var status)
+                || !this.TryParseNullableInt(objectSizePart, out var objectSize)
                 || !this.TryParse(requestPart, out LogEntryRequest request))
             {
                 result = null;
@@ -50,11 +50,11 @@ namespace Sawmill.Data
 
         private bool TryParse(ReadOnlySpan<char> span, out LogEntryRequest result)
         {
-            span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> methodSpan);
-            span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> uriSpan);
-            span = span.TrimAndSlice(' ', ' ', out ReadOnlySpan<char> protocolSpan);
+            span = span.TrimAndSlice(' ', ' ', out var methodSpan);
+            span = span.TrimAndSlice(' ', ' ', out var uriSpan);
+            span = span.TrimAndSlice(' ', ' ', out var protocolSpan);
 
-            if (!Uri.TryCreate(uriSpan.ToString(), UriKind.RelativeOrAbsolute, out Uri uri))
+            if (!Uri.TryCreate(uriSpan.ToString(), UriKind.RelativeOrAbsolute, out var uri))
             {
                 result = null;
                 return false;
@@ -94,7 +94,7 @@ namespace Sawmill.Data
                 return true;
             }
 
-            var success = int.TryParse(span, NumberStyles.Integer, CultureInfo.InvariantCulture, out int value);
+            var success = int.TryParse(span, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value);
             result = value;
             return success;
         }

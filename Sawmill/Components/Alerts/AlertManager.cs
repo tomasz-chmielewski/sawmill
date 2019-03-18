@@ -14,7 +14,7 @@ namespace Sawmill.Components.Alerts
         {
             this.AlertHandler = alertHandler ?? throw new ArgumentNullException(nameof(alertHandler));
 
-            AlertManagerOptions options = optionsAccessor.Value;
+            var options = optionsAccessor.Value;
             this.MonitoredPeriodUtc.Duration = TimeSpanEx.FromSecondsInt(options.MonitoredPeriodSeconds);
             this.Delay = TimeSpanEx.FromSecondsInt(options.DelaySeconds);
             this.HitsPerSecondsThreshold = options.HitsPerSecondsThreshold;
@@ -24,7 +24,7 @@ namespace Sawmill.Components.Alerts
         private TimeSpan Delay { get; }
 
         private int HitsPerSecondsThreshold { get; }
-        private int HitCountThreshold => HitsPerSecondsThreshold * this.MonitoredPeriodUtc.Duration.TotalSecondsAsInt();
+        private int HitCountThreshold => this.HitsPerSecondsThreshold * this.MonitoredPeriodUtc.Duration.TotalSecondsAsInt();
 
         private int MonitoredPeriodHitCount { get; set; }
         private Dictionary<DateTime, int> HistoricalHitCount { get; } = new Dictionary<DateTime, int>();
