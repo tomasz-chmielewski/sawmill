@@ -8,6 +8,9 @@ using System.Collections.Generic;
 
 namespace Sawmill.Components.Alerts
 {
+    /// <summary>
+    /// Provides alert-related application logic.
+    /// </summary>
     public class AlertManager : IAlertManager
     {
         public AlertManager(IOptions<AlertManagerOptions> optionsAccessor, IAlertHandler alertHandler)
@@ -32,11 +35,20 @@ namespace Sawmill.Components.Alerts
         private bool HasAlert { get; set; }
         private IAlertHandler AlertHandler { get; }
 
+        /// <summary>
+        /// Initialize the monitored period according to the specified current time in UTC.
+        /// </summary>
+        /// <param name="utcNow">Current time in UTC.</param>
         public void Initialize(DateTime utcNow)
         {
             this.MonitoredPeriodUtc.Start = this.GetMonitoredPeriodStartUtc(utcNow);
         }
 
+        /// <summary>
+        /// Process the specified log entries.
+        /// </summary>
+        /// <param name="logEntries">Log entries to process.</param>
+        /// <returns>Number of processed entries. It may be less then the number of specified entries if some of the entries are rejected.</returns>
         public int Process(IEnumerable<ILogEntry> logEntries)
         {
             var processedRequests = 0;
@@ -62,6 +74,11 @@ namespace Sawmill.Components.Alerts
             return processedRequests;
         }
 
+        /// <summary>
+        /// Moves the monitored period according to the specified current time in UTC.
+        /// </summary>
+        /// <param name="utcNow">Current time in UTC.</param>
+        /// <exception cref="InvalidOperationException">Attempt to move the monitored period to the past.</exception>
         public void MoveMonitoredPeriod(DateTime utcNow)
         {
             var newStartUtc = this.GetMonitoredPeriodStartUtc(utcNow);

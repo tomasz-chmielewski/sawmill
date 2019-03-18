@@ -8,6 +8,9 @@ using System.Linq;
 
 namespace Sawmill.Components.Statistics
 {
+    /// <summary>
+    /// Provides statistics report related events handling.
+    /// </summary>
     public class ReportHandler : IReportHandler
     {
         public ReportHandler(IOptions<ReportHandlerOptions> optionsAccessor)
@@ -91,7 +94,7 @@ namespace Sawmill.Components.Statistics
                     this.PrintSeparator();
                 }
 
-                this.Print(ConsoleColor.White, section.Path);
+                this.Print(ConsoleColor.White, section.SectionPath);
                 this.Print(": ");
                 this.Print(section.HitCount.ToString(this.CultureInfo));
 

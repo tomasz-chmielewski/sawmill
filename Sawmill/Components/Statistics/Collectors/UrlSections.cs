@@ -7,6 +7,9 @@ using System.Linq;
 
 namespace Sawmill.Components.Statistics.Collectors
 {
+    /// <summary>
+    /// Collects statistics related to URL sections.
+    /// </summary>
     public class UrlSections : IStatisticsCollector, IEnumerable<IUrlSection>
     {
         private Dictionary<string, UrlSection> Sections { get; }
@@ -15,6 +18,11 @@ namespace Sawmill.Components.Statistics.Collectors
         private SortedDictionary<int, HashSet<UrlSection>> SectionIndex { get; }
             = new SortedDictionary<int, HashSet<UrlSection>>(Comparer<int>.Create((a, b) => b.CompareTo(a)));
 
+        /// <summary>
+        /// Process the specified log entry.
+        /// </summary>
+        /// <param name="logEntry">Log entry to process.</param>
+        /// <returns>true if the entry was processed or false otherwise.</returns>
         public bool Process(ILogEntry logEntry)
         {
             var path = this.GetSectionPath(logEntry);
@@ -39,11 +47,19 @@ namespace Sawmill.Components.Statistics.Collectors
             return true;
         }
 
+        /// <summary>
+        /// Returns an enumerator that iterates through the collection in the descending order by number of hits on the specified URL section.
+        /// </summary>
+        /// <returns>An enumerator that can be used to iterate through the collection in the descending order by number of hits on the specified URL section.</returns>
         public IEnumerator<IUrlSection> GetEnumerator()
         {
             return this.SectionIndex.SelectMany(x => x.Value).Cast<IUrlSection>().GetEnumerator();
         }
 
+        /// <summary>
+        /// Returns an enumerator that iterates through the collection in the descending order by number of hits on the specified URL section.
+        /// </summary>
+        /// <returns>An enumerator that can be used to iterate through the collection in the descending order by number of hits on the specified URL section.</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return this.GetEnumerator();
@@ -98,7 +114,7 @@ namespace Sawmill.Components.Statistics.Collectors
         {
             var slashIndex = uri.IndexOf('/');
 
-            // is it absolute uri ? "http://xxxxxx.xxx/section/..."
+            // Is it an absolute uri ? "http://xxxxxx.xxx/section/..."
             if(slashIndex > 0 && uri[slashIndex - 1] == ':')
             {
                 if(slashIndex + 2 >= uri.Length || uri[slashIndex + 1] != '/')
@@ -116,11 +132,11 @@ namespace Sawmill.Components.Statistics.Collectors
         {
             public UrlSection(string path, int hitCount)
             {
-                this.Path = path;
+                this.SectionPath = path;
                 this.HitCount = hitCount;
             }
 
-            public string Path { get; }
+            public string SectionPath { get; }
             public int HitCount { get; set;  }
         }
     }

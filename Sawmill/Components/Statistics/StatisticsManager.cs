@@ -8,6 +8,9 @@ using System.Collections.Generic;
 
 namespace Sawmill.Components.Statistics
 {
+    /// <summary>
+    /// Provides statistics-related application logic.
+    /// </summary>
     public class StatisticsManager : IStatisticsManager
     {
         public StatisticsManager(IOptions<StatisticsOptions> optionsAccessor, IReportHandler reportHandler)
@@ -31,12 +34,20 @@ namespace Sawmill.Components.Statistics
 
         private IReportHandler ReportHandler { get; }
 
+        /// <summary>
+        /// Initialize the monitored period according to the specified current time in UTC.
+        /// </summary>
         public void Initialize(DateTime utcNow)
         {
             this.MonitoredPeriodUtc.Start = this.GetMonitoredPeriodStartUtc(utcNow);
             this.GlobalStatisticsStartUtc = this.MonitoredPeriodUtc.Start;
         }
 
+        /// <summary>
+        /// Process the specified log entries.
+        /// </summary>
+        /// <param name="logEntries">Log entries to process.</param>
+        /// <returns>Number of processed entries. It may be less then the number of specified entries if some of the entries are rejected.</returns>
         public int Process(IEnumerable<ILogEntry> logEntries)
         {
             var processedRequests = 0;
@@ -66,6 +77,11 @@ namespace Sawmill.Components.Statistics
             return processedRequests;
         }
 
+        /// <summary>
+        /// Moves the monitored period according to the specified current time in UTC.
+        /// </summary>
+        /// <param name="utcNow">Current time in UTC.</param>
+        /// <exception cref="InvalidOperationException">Attempt to move the monitored period to the past.</exception>
         public void MoveMonitoredPeriod(DateTime utcNow)
         {
             if (utcNow >= this.ReportTimeUtc)

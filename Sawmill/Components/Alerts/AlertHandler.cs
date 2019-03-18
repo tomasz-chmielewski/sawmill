@@ -4,6 +4,9 @@ using System;
 
 namespace Sawmill.Components.Alerts
 {
+    /// <summary>
+    /// Provides alert-related events handling.
+    /// </summary>
     public class AlertHandler : IAlertHandler
     {
         public void RaiseAlert(DateTime timeStamp, int hitCount)
