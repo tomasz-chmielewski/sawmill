@@ -15,7 +15,7 @@ namespace Sawmill.Components.Alerts
 
         public void RecoverFromAlert(DateTime timeStamp, int hitCount)
         {
-            var message = $"Recovered from the altert - hits = {hitCount}, triggered at {this.Format(timeStamp)}";
+            var message = $"Recovered from the alert - hits = {hitCount}, triggered at {this.Format(timeStamp)}";
 
             this.Print(ConsoleColor.Green, message);
         }
