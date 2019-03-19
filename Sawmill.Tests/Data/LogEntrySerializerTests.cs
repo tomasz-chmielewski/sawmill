@@ -15,15 +15,15 @@ namespace Sawmill.Tests.Data
 
             Assert.IsTrue(serializer.TryParse(serializdEntry, out var log));
 
-            Assert.AreEqual(log.ClientAddress, new IPAddress(new byte[] { 127, 12, 254, 0 }));
-            Assert.AreEqual(log.UserId, "user_id");
-            Assert.AreEqual(log.UserName, "james");
-            Assert.AreEqual(log.TimeStampUtc, new DateTime(2018, 5, 9, 15, 0, 39, DateTimeKind.Utc));
-            Assert.AreEqual(log.Request.Method, "GET");
-            Assert.AreEqual(log.Request.Uri, new Uri("/report/latest", UriKind.Relative));
-            Assert.AreEqual(log.Request.Protocol, "HTTP/1.0");
-            Assert.AreEqual(log.Status, 200);
-            Assert.AreEqual(log.ObjectSize, 123 as int?);
+            Assert.AreEqual(new IPAddress(new byte[] { 127, 12, 254, 0 }), log.ClientAddress);
+            Assert.AreEqual("user_id", log.UserId);
+            Assert.AreEqual("james", log.UserName);
+            Assert.AreEqual(new DateTime(2018, 5, 9, 15, 0, 39, DateTimeKind.Utc), log.TimeStampUtc);
+            Assert.AreEqual("GET", log.Request.Method);
+            Assert.AreEqual(new Uri("/report/latest", UriKind.Relative), log.Request.Uri);
+            Assert.AreEqual("HTTP/1.0", log.Request.Protocol);
+            Assert.AreEqual(200, log.Status);
+            Assert.AreEqual(123 as int?, log.ObjectSize);
         }
 
         [TestCase("127.12.0 user_id james [09/May/2018:16:00:39 +0100] \"GET /report/latest HTTP/1.0\" 200 123", IgnoreReason = "This test case doesn't work due to the way IPAddress class parses strings.")]       // invalid IP address
@@ -59,9 +59,9 @@ namespace Sawmill.Tests.Data
 
             Assert.IsTrue(serializer.TryParse(serializdEntry, out var log));
 
-            Assert.AreEqual(log.UserId, string.Empty);
-            Assert.AreEqual(log.UserName, string.Empty);
-            Assert.AreEqual(log.ObjectSize, null as int?);
+            Assert.AreEqual(string.Empty, log.UserId);
+            Assert.AreEqual(string.Empty, log.UserName);
+            Assert.AreEqual(null as int?, log.ObjectSize);
         }
     }
 }
