@@ -114,7 +114,7 @@ namespace Sawmill.Components.Providers
 
                 if(!this.Serializer.TryParse(line, out var logEntry))
                 {
-                    this.HandleWarning("Persing error");
+                    this.HandleWarning("Parsing error");
                     continue;
                 }
 

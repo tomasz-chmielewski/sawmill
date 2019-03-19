@@ -96,36 +96,28 @@ namespace Sawmill.Components.Statistics.Collectors
 
         private string GetSectionPath(ILogEntry logEntry)
         {
-            var uri = logEntry.Request.Uri.ToString().AsSpan();
+            // TODO: Optimize this method
 
-            var firstSlash = this.IndexOfRelativePath(uri);
-            if(firstSlash < 0)
+            var uri = logEntry.Request.Uri;
+
+            // convert to absolute uri, because Uri.Segments doesn't work with relative uris
+            if (!uri.IsAbsoluteUri)
             {
-                return null;
-            }
-
-            uri = uri.Slice(firstSlash);
-            var secondSlash = uri.Length > 0 ? uri.Slice(1).IndexOfAny('/', '?') : -1;
-
-            return (secondSlash != -1 ? uri.Slice(0, secondSlash + 1) : uri).ToString();
-        }
-
-        private int IndexOfRelativePath(ReadOnlySpan<char> uri)
-        {
-            var slashIndex = uri.IndexOf('/');
-
-            // Is it an absolute uri ? "http://xxxxxx.xxx/section/..."
-            if(slashIndex > 0 && uri[slashIndex - 1] == ':')
-            {
-                if(slashIndex + 2 >= uri.Length || uri[slashIndex + 1] != '/')
+                if(!Uri.TryCreate(new Uri("http://dummy.com"), uri, out uri))
                 {
-                    return -1;
+                    return null;
                 }
-
-                slashIndex += 2 + uri.Slice(slashIndex + 2).IndexOf('/');
             }
 
-            return slashIndex;
+            var segmentCount = uri.Segments.Length;
+
+            // take no more then 2 first segments
+            var path = string.Concat(uri.Segments.Take(Math.Min(2, segmentCount)));
+
+            // remove "/" from the end if there are more then one secions
+            return segmentCount > 1 && path[path.Length - 1] == '/'
+                ? path.Remove(path.Length - 1)
+                : path;
         }
 
         private class UrlSection : IUrlSection
