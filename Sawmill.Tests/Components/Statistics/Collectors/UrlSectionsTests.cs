@@ -29,6 +29,8 @@ namespace Sawmill.Tests.Components.Statistics.Collectors
         [TestCase("/my%2Dend%20point", "/my-end%20point")]
         [TestCase("/my%2Dend%20point/", "/my-end%20point")]
         [TestCase("/my%2Dend%20point/test", "/my-end%20point")]
+        [TestCase("/SECTION", "/SECTION")]
+        [TestCase("/Section", "/Section")]
         public void CorrectlyProcessUrlSections(string url, string expectedSection)
         {
             var collector = new UrlSections();
