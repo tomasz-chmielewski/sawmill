@@ -80,3 +80,7 @@ At 10:20:32 the alert for the [10:20:20, 10:20:30) period will be displayed (if 
 <pre>High traffic generated an alert - hits = 1250, triggered at 13:25:56
 Recovered from the alert - hits = 1170, triggered at 13:28:02</pre>
 * all the presented timestamps are expressed in local time zone
+
+## Links
+[github](https://github.com/tomasz-chmielewski/sawmill)  
+[docker hub](https://hub.docker.com/r/tomaszchmielewski/sawmill)
